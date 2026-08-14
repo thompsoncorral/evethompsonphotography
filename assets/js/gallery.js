@@ -317,7 +317,22 @@
       const item = items[Number(row.dataset.i)];
       if (!item) return;
       if (item.stripeLink) {
-        window.open(item.stripeLink, "_blank", "noopener");
+        // Tag the checkout with this photo's ID so we know which photo was
+        // ordered when fulfilling manually -- see the Stripe payment's
+        // client_reference_id (or the "Client reference ID" column/filter
+        // in the Stripe Dashboard payments list).
+        let checkoutUrl = item.stripeLink;
+        if (buyPhoto && buyPhoto.id) {
+          try {
+            const url = new URL(checkoutUrl);
+            url.searchParams.set("client_reference_id", buyPhoto.id);
+            checkoutUrl = url.toString();
+          } catch {
+            const sep = checkoutUrl.includes("?") ? "&" : "?";
+            checkoutUrl = `${checkoutUrl}${sep}client_reference_id=${encodeURIComponent(buyPhoto.id)}`;
+          }
+        }
+        window.open(checkoutUrl, "_blank", "noopener");
       } else {
         showToast(`Add a Stripe Payment Link for "${item.label}" in data/galleries.json`);
       }
