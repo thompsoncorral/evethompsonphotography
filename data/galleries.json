@@ -1,0 +1,316 @@
+{
+  "studio": {
+    "name": "Eve Thompson Photography",
+    "logoText": "EVE THOMPSON PHOTOGRAPHY"
+  },
+  "priceSheets": {
+    "default": {
+      "prints": [
+        {
+          "label": "8 Up Wallet",
+          "price": "$8.00",
+          "stripeLink": ""
+        },
+        {
+          "label": "4 x 6",
+          "price": "$4.00",
+          "stripeLink": ""
+        },
+        {
+          "label": "5 x 7",
+          "price": "$6.00",
+          "stripeLink": ""
+        },
+        {
+          "label": "8 x 10",
+          "price": "$8.00",
+          "stripeLink": ""
+        },
+        {
+          "label": "8 x 12",
+          "price": "$12.00",
+          "stripeLink": ""
+        },
+        {
+          "label": "11 x 14",
+          "price": "$14.00",
+          "stripeLink": ""
+        },
+        {
+          "label": "12 x 18",
+          "price": "$19.00",
+          "stripeLink": ""
+        },
+        {
+          "label": "16 x 20",
+          "price": "$38.00",
+          "stripeLink": ""
+        }
+      ],
+      "wallArt": [
+        {
+          "label": "Canvas Wrap 16x20",
+          "price": "$65.00",
+          "stripeLink": ""
+        },
+        {
+          "label": "Framed Print 16x20",
+          "price": "$95.00",
+          "stripeLink": ""
+        },
+        {
+          "label": "Metal Print 16x20",
+          "price": "$110.00",
+          "stripeLink": ""
+        }
+      ],
+      "cards": [
+        {
+          "label": "Greeting Card Set (10)",
+          "price": "$24.00",
+          "stripeLink": ""
+        },
+        {
+          "label": "Holiday Card Set (25)",
+          "price": "$45.00",
+          "stripeLink": ""
+        }
+      ],
+      "albumsBooks": [
+        {
+          "label": "10x10 Photo Book, 20pg",
+          "price": "$120.00",
+          "stripeLink": ""
+        },
+        {
+          "label": "Leather Album, 20pg",
+          "price": "$260.00",
+          "stripeLink": ""
+        }
+      ]
+    }
+  },
+  "galleries": [
+    {
+      "slug": "personal-gallery",
+      "title": "Personal Gallery",
+      "eventDate": "",
+      "cover": "assets/images/personal-gallery/full/1.jpg",
+      "coverThumb": "assets/images/personal-gallery/thumb/1.jpg",
+      "downloadEnabled": true,
+      "storeEnabled": true,
+      "favoritesEnabled": true,
+      "setName": "Highlights",
+      "keyword": "",
+      "priceSheet": "default",
+      "photos": [
+        {
+          "id": "personal-gallery-1",
+          "filename": "DSC_1001.jpg",
+          "full": "assets/images/personal-gallery/full/1.jpg",
+          "thumb": "assets/images/personal-gallery/thumb/1.jpg",
+          "width": 1600,
+          "height": 1067
+        },
+        {
+          "id": "personal-gallery-2",
+          "filename": "DSC_1002.jpg",
+          "full": "assets/images/personal-gallery/full/2.jpg",
+          "thumb": "assets/images/personal-gallery/thumb/2.jpg",
+          "width": 1600,
+          "height": 1067
+        },
+        {
+          "id": "personal-gallery-3",
+          "filename": "DSC_1003.jpg",
+          "full": "assets/images/personal-gallery/full/3.jpg",
+          "thumb": "assets/images/personal-gallery/thumb/3.jpg",
+          "width": 1200,
+          "height": 1600
+        },
+        {
+          "id": "personal-gallery-4",
+          "filename": "DSC_1004.jpg",
+          "full": "assets/images/personal-gallery/full/4.jpg",
+          "thumb": "assets/images/personal-gallery/thumb/4.jpg",
+          "width": 1600,
+          "height": 1067
+        },
+        {
+          "id": "personal-gallery-5",
+          "filename": "DSC_1005.jpg",
+          "full": "assets/images/personal-gallery/full/5.jpg",
+          "thumb": "assets/images/personal-gallery/thumb/5.jpg",
+          "width": 1600,
+          "height": 1067
+        },
+        {
+          "id": "personal-gallery-6",
+          "filename": "DSC_1006.jpg",
+          "full": "assets/images/personal-gallery/full/6.jpg",
+          "thumb": "assets/images/personal-gallery/thumb/6.jpg",
+          "width": 1200,
+          "height": 1600
+        },
+        {
+          "id": "personal-gallery-7",
+          "filename": "DSC_1007.jpg",
+          "full": "assets/images/personal-gallery/full/7.jpg",
+          "thumb": "assets/images/personal-gallery/thumb/7.jpg",
+          "width": 1600,
+          "height": 1067
+        },
+        {
+          "id": "personal-gallery-8",
+          "filename": "DSC_1008.jpg",
+          "full": "assets/images/personal-gallery/full/8.jpg",
+          "thumb": "assets/images/personal-gallery/thumb/8.jpg",
+          "width": 1600,
+          "height": 1067
+        },
+        {
+          "id": "personal-gallery-9",
+          "filename": "DSC_1009.jpg",
+          "full": "assets/images/personal-gallery/full/9.jpg",
+          "thumb": "assets/images/personal-gallery/thumb/9.jpg",
+          "width": 1200,
+          "height": 1600
+        },
+        {
+          "id": "personal-gallery-10",
+          "filename": "DSC_1010.jpg",
+          "full": "assets/images/personal-gallery/full/10.jpg",
+          "thumb": "assets/images/personal-gallery/thumb/10.jpg",
+          "width": 1600,
+          "height": 1067
+        },
+        {
+          "id": "personal-gallery-11",
+          "filename": "DSC_1011.jpg",
+          "full": "assets/images/personal-gallery/full/11.jpg",
+          "thumb": "assets/images/personal-gallery/thumb/11.jpg",
+          "width": 1600,
+          "height": 1067
+        }
+      ]
+    },
+    {
+      "slug": "sample-wedding",
+      "title": "Sample Wedding",
+      "eventDate": "2026-06-14",
+      "cover": "assets/images/sample-wedding/full/1.jpg",
+      "coverThumb": "assets/images/sample-wedding/thumb/1.jpg",
+      "downloadEnabled": false,
+      "storeEnabled": true,
+      "favoritesEnabled": true,
+      "setName": "Highlights",
+      "keyword": "",
+      "priceSheet": "default",
+      "photos": [
+        {
+          "id": "sample-wedding-1",
+          "filename": "DSC_1001.jpg",
+          "full": "assets/images/sample-wedding/full/1.jpg",
+          "thumb": "assets/images/sample-wedding/thumb/1.jpg",
+          "width": 1600,
+          "height": 1067
+        },
+        {
+          "id": "sample-wedding-2",
+          "filename": "DSC_1002.jpg",
+          "full": "assets/images/sample-wedding/full/2.jpg",
+          "thumb": "assets/images/sample-wedding/thumb/2.jpg",
+          "width": 1600,
+          "height": 1067
+        },
+        {
+          "id": "sample-wedding-3",
+          "filename": "DSC_1003.jpg",
+          "full": "assets/images/sample-wedding/full/3.jpg",
+          "thumb": "assets/images/sample-wedding/thumb/3.jpg",
+          "width": 1200,
+          "height": 1600
+        },
+        {
+          "id": "sample-wedding-4",
+          "filename": "DSC_1004.jpg",
+          "full": "assets/images/sample-wedding/full/4.jpg",
+          "thumb": "assets/images/sample-wedding/thumb/4.jpg",
+          "width": 1600,
+          "height": 1067
+        },
+        {
+          "id": "sample-wedding-5",
+          "filename": "DSC_1005.jpg",
+          "full": "assets/images/sample-wedding/full/5.jpg",
+          "thumb": "assets/images/sample-wedding/thumb/5.jpg",
+          "width": 1600,
+          "height": 1067
+        },
+        {
+          "id": "sample-wedding-6",
+          "filename": "DSC_1006.jpg",
+          "full": "assets/images/sample-wedding/full/6.jpg",
+          "thumb": "assets/images/sample-wedding/thumb/6.jpg",
+          "width": 1200,
+          "height": 1600
+        }
+      ]
+    },
+    {
+      "slug": "sample-family",
+      "title": "Sample Family Session",
+      "eventDate": "2026-05-02",
+      "cover": "assets/images/sample-family/full/1.jpg",
+      "coverThumb": "assets/images/sample-family/thumb/1.jpg",
+      "downloadEnabled": true,
+      "storeEnabled": false,
+      "favoritesEnabled": true,
+      "setName": "Highlights",
+      "keyword": "family2026",
+      "priceSheet": "default",
+      "photos": [
+        {
+          "id": "sample-family-1",
+          "filename": "DSC_1001.jpg",
+          "full": "assets/images/sample-family/full/1.jpg",
+          "thumb": "assets/images/sample-family/thumb/1.jpg",
+          "width": 1600,
+          "height": 1067
+        },
+        {
+          "id": "sample-family-2",
+          "filename": "DSC_1002.jpg",
+          "full": "assets/images/sample-family/full/2.jpg",
+          "thumb": "assets/images/sample-family/thumb/2.jpg",
+          "width": 1600,
+          "height": 1067
+        },
+        {
+          "id": "sample-family-3",
+          "filename": "DSC_1003.jpg",
+          "full": "assets/images/sample-family/full/3.jpg",
+          "thumb": "assets/images/sample-family/thumb/3.jpg",
+          "width": 1200,
+          "height": 1600
+        },
+        {
+          "id": "sample-family-4",
+          "filename": "DSC_1004.jpg",
+          "full": "assets/images/sample-family/full/4.jpg",
+          "thumb": "assets/images/sample-family/thumb/4.jpg",
+          "width": 1600,
+          "height": 1067
+        },
+        {
+          "id": "sample-family-5",
+          "filename": "DSC_1005.jpg",
+          "full": "assets/images/sample-family/full/5.jpg",
+          "thumb": "assets/images/sample-family/thumb/5.jpg",
+          "width": 1600,
+          "height": 1067
+        }
+      ]
+    }
+  ]
+}

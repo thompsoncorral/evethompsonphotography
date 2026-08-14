@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Gallery</title>
+<link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+
+<a class="icon-btn" id="backLink" href="index.html" style="position:fixed; top:16px; left:16px; z-index:40; background:#fff; border-radius:50%; width:36px; height:36px; box-shadow:0 1px 4px rgba(0,0,0,0.2); justify-content:center; display:none;">&larr;</a>
+
+<!-- Keyword gate: shown only for galleries with a "keyword" set in data/galleries.json.
+     This is a soft, client-side speed bump, not real security -- see README. -->
+<section class="gate" id="gate">
+  <div class="gate__box">
+    <p class="gate__label" id="gateLabel"></p>
+    <h2 class="gate__title" id="gateGalleryTitle">Gallery</h2>
+    <p class="gate__subtitle">Enter the keyword to view this gallery</p>
+    <form id="gateForm">
+      <input type="text" id="gateInput" placeholder="Keyword" autocomplete="off" />
+      <button type="submit" class="btn">Enter</button>
+    </form>
+    <p class="gate__error" id="gateError" style="display:none;">That keyword didn't match -- try again.</p>
+    <p class="gate__hint">Don't have the keyword? Ask the photographer who shared this link with you.</p>
+  </div>
+</section>
+
+<section class="hero" id="hero">
+  <div class="hero__content">
+    <h1 class="hero__title" id="heroTitle">Gallery</h1>
+    <button class="hero__cta" id="viewGalleryBtn">View Gallery</button>
+  </div>
+  <div class="hero__studio" id="heroStudio"></div>
+</section>
+
+<nav class="gallery-nav" id="galleryNav">
+  <div>
+    <div class="gallery-nav__title" id="navTitle">Gallery</div>
+    <div class="gallery-nav__studio" id="navStudio"></div>
+  </div>
+  <div class="gallery-nav__actions">
+    <a class="icon-btn" id="storeLink" href="#" style="display:none; font-weight:700; letter-spacing:0.08em; font-size:0.75rem;">PRINT STORE</a>
+    <button class="icon-btn" id="favCountBtn" title="Favorites">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7.5-4.6-10-9.3C.6 8 2 4 6 4c2.2 0 3.7 1.2 6 3.6C14.3 5.2 15.8 4 18 4c4 0 5.4 4 4 7.7C19.5 16.4 12 21 12 21z"/></svg>
+      <span id="favCount">0</span>
+    </button>
+    <button class="icon-btn" id="shareBtn" title="Share gallery">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="10.6" x2="15.4" y2="6.4"/><line x1="8.6" y1="13.4" x2="15.4" y2="17.6"/></svg>
+    </button>
+    <button class="icon-btn" id="slideshowBtn" title="Slideshow">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+    </button>
+  </div>
+</nav>
+
+<div class="download-banner" id="downloadBanner" style="display:none;">
+  <p><strong>Free downloads are on</strong> for this gallery -- click any photo, then hit "Download" for the full-resolution file.</p>
+</div>
+
+<main class="masonry" id="masonry"></main>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox">
+  <div class="lightbox__bar">
+    <button class="icon-btn" id="lightboxClose">&larr; Back</button>
+    <div class="lightbox__actions">
+      <button class="icon-btn" id="lbFavBtn" title="Favorite">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7.5-4.6-10-9.3C.6 8 2 4 6 4c2.2 0 3.7 1.2 6 3.6C14.3 5.2 15.8 4 18 4c4 0 5.4 4 4 7.7C19.5 16.4 12 21 12 21z"/></svg>
+      </button>
+      <button class="icon-btn" id="lbShareBtn" title="Share photo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="10.6" x2="15.4" y2="6.4"/><line x1="8.6" y1="13.4" x2="15.4" y2="17.6"/></svg>
+      </button>
+      <button class="icon-btn" id="lbSlideshowBtn" title="Slideshow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+      </button>
+      <a class="btn btn--outline" id="lbDownloadBtn" style="display:none;" download>Download</a>
+      <button class="btn" id="lbBuyBtn" style="display:none;">Buy Photo</button>
+    </div>
+  </div>
+  <div class="lightbox__stage">
+    <button class="lightbox__nav lightbox__nav--prev" id="lbPrev">&larr;</button>
+    <img id="lbImage" src="" alt="" />
+    <button class="lightbox__nav lightbox__nav--next" id="lbNext">&rarr;</button>
+  </div>
+  <div class="lightbox__caption" id="lbCaption"></div>
+</div>
+
+<!-- Buy modal -->
+<div class="modal-backdrop" id="buyModalBackdrop">
+  <div class="modal">
+    <div class="modal__preview">
+      <img id="buyModalImage" src="" alt="" />
+    </div>
+    <div class="modal__panel">
+      <div class="modal__header">
+        <h2>Buy This Photo</h2>
+        <button class="modal__close" id="buyModalClose">&times;</button>
+      </div>
+      <a href="#" id="visitStoreLink" style="font-size:0.75rem; font-weight:700; letter-spacing:0.05em; display:inline-block; margin-bottom:10px;">VISIT FULL PRICE SHEET &rsaquo;</a>
+      <div class="modal__tabs" id="buyTabs">
+        <button class="modal__tab is-active" data-tab="prints">Prints</button>
+        <button class="modal__tab" data-tab="wallArt">Wall Art</button>
+        <button class="modal__tab" data-tab="cards">Cards</button>
+        <button class="modal__tab" data-tab="albumsBooks">Albums &amp; Books</button>
+      </div>
+      <div id="buyList"></div>
+      <p class="note">Checkout is handled securely by Stripe. Add a note with the photo filename at checkout so your photographer knows which image to fulfill -- see the README for how to enable a custom field automatically.</p>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="assets/js/gallery.js"></script>
+</body>
+</html>
