@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+  <html lang="en">
+  <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Book a Session -- Eve Thompson Photography</title>
+<meta name="description" content="Book a photography session with Eve Thompson Photography." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&amp;display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+  </head>
+  <body>
+
+  <header class="topbar">
+    <div class="topbar__brand">Eve Thompson Photography</div>
+  <nav class="topbar__nav">
+    <a href="index.html" class="topbar__navlink">Home</a>
+      <a href="collections.html" class="topbar__navlink">Gallery</a>
+      <a href="book.html" class="topbar__navlink is-active">Book a Session</a>
+    </nav>
+  </header>
+
+  <section class="book-page">
+    <h1 class="book-page__title">Book a Session</h1>
+  <p class="book-page__intro">Tell me a bit about what you're looking for, and I'll follow up to set up your session.</p>
+
+    <form class="book-form" id="bookForm">
+      <label class="book-form__field">
+        <span>Name</span>
+        <input type="text" name="name" required />
+      </label>
+      <label class="book-form__field">
+        <span>Email</span>
+        <input type="email" name="email" required />
+      </label>
+      <label class="book-form__field">
+        <span>Phone (optional)</span>
+        <input type="tel" name="phone" />
+      </label>
+      <label class="book-form__field">
+        <span>Session type</span>
+        <select name="sessionType">
+          <option>Portrait</option>
+          <option>Family</option>
+          <option>Wedding</option>
+          <option>Event</option>
+          <option>Other</option>
+        </select>
+      </label>
+      <label class="book-form__field">
+        <span>Preferred date(s)</span>
+        <input type="text" name="date" placeholder="e.g. early October, or a specific date" />
+      </label>
+      <label class="book-form__field">
+        <span>Location</span>
+      <input type="text" name="location" placeholder="Where would you like to shoot?" />
+      </label>
+      <label class="book-form__field book-form__field--full">
+        <span>Tell me more about your session</span>
+        <textarea name="message" rows="5" placeholder="Anything you'd like me to know -- number of people, occasion, style you love, etc."></textarea>
+      </label>
+      <button type="submit" class="btn">Send Request</button>
+    </form>
+  </section>
+
+  <footer class="home-footer">
+    <nav class="home-footer__nav">
+      <a href="index.html">Home</a>
+      <a href="collections.html">Gallery</a>
+      <a href="book.html">Book a Session</a>
+    </nav>
+    <p class="home-footer__copyright">All content Copyright &copy; <span id="year"></span> Eve Thompson Photography</p>
+  </footer>
+
+  <script>
+  document.getElementById("year").textContent = new Date().getFullYear();
+  document.getElementById("bookForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var data = new FormData(this);
+    var lines = [
+      "Name: " + data.get("name"),
+      "Email: " + data.get("email"),
+      "Phone: " + (data.get("phone") || "-"),
+      "Session type: " + data.get("sessionType"),
+      "Preferred date(s): " + (data.get("date") || "-"),
+      "Location: " + (data.get("location") || "-"),
+    "",
+    "Details:",
+      data.get("message") || "-"
+    ];
+    var subject = encodeURIComponent("Session inquiry from " + data.get("name"));
+    var body = encodeURIComponent(lines.join("\n"));
+    window.location.href = "mailto:eve@evethompsonphotography.com?subject=" + subject + "&body=" + body;
+  });
+  </script>
+  </body>
+  </html>
+  
