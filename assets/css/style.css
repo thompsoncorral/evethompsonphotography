@@ -99,7 +99,7 @@ button { font-family: inherit; cursor: pointer; }
   border: 1px solid var(--hairline);
 }
 
-/* ---------------- Home page: collection grid ---------------- */
+/* ---------------- Top bar navigation ---------------- */ .topbar__nav { display: flex; align-items: center; gap: 24px; } .topbar__navlink { font-size: 0.9rem; font-weight: 600; color: var(--ink-soft); padding: 4px 0; border-bottom: 2px solid transparent; } .topbar__navlink:hover { color: var(--ink); } .topbar__navlink.is-active { color: var(--ink); border-bottom-color: var(--ink); } /* ---------------- Home page: hero ---------------- */ .home-hero { max-width: 640px; margin: 0 auto; padding: 120px 32px 90px; text-align: center; } .home-hero__eyebrow { font-size: 0.75rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-soft); margin: 0 0 18px; } .home-hero__title { font-size: clamp(2.1rem, 5vw, 3.4rem); line-height: 1.15; margin: 0 0 22px; font-weight: 800; } .home-hero__subtitle { font-size: 1.05rem; line-height: 1.6; color: var(--ink-soft); margin: 0 0 32px; } /* ---------------- Home page: collection grid ---------------- */
 
 .page-header {
   display: flex;
