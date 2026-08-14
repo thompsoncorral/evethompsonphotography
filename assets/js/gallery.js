@@ -70,7 +70,7 @@
     document.getElementById("heroStudio").textContent = (data.studio && data.studio.logoText) || studioName;
     document.getElementById("navTitle").textContent = gallery.title.toUpperCase();
     document.getElementById("navStudio").textContent = (data.studio && data.studio.logoText) || studioName;
-    document.getElementById("backLink").href = "index.html";
+    document.getElementById("backLink").href = "collections.html";
 
     if (gallery.storeEnabled) {
       const storeLink = document.getElementById("storeLink");
