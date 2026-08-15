@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+  <html lang="en">
+  <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Public Gallery -- Eve Thompson Photography</title>
+<meta name="description" content="A public gallery of photography work by Eve Thompson Photography." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+  </head>
+  <body>
+
+  <header class="topbar">
+  <div class="topbar__brand">Eve Thompson Photography</div>
+<nav class="topbar__nav">
+<a href="index.html" class="topbar__navlink">Home</a>
+  <a href="public-gallery.html" class="topbar__navlink is-active">Public Gallery</a>
+  <a href="book.html" class="topbar__navlink">Book a Session</a>
+  </nav>
+  </header>
+
+  <div class="page-header">
+  <h1>Public Gallery</h1>
+  </div>
+
+  <main class="masonry" id="publicGalleryGrid"></main>
+  <p class="empty-state" id="publicGalleryEmpty">Photos coming soon.</p>
+
+<div class="lightbox" id="lightbox">
+<div class="lightbox__bar">
+<button class="icon-btn" id="lightboxClose">&larr; Back</button>
+  </div>
+  <div class="lightbox__stage">
+  <button class="lightbox__nav lightbox__nav--prev" id="lbPrev">&larr;</button>
+  <img id="lbImage" src="" alt="" />
+  <button class="lightbox__nav lightbox__nav--next" id="lbNext">&rarr;</button>
+  </div>
+  <div class="lightbox__caption" id="lbCaption"></div>
+  </div>
+
+  <footer class="home-footer">
+  <nav class="home-footer__nav">
+  <a href="index.html">Home</a>
+  <a href="public-gallery.html">Public Gallery</a>
+  <a href="book.html">Book a Session</a>
+</nav>
+<p class="home-footer__copyright">All content Copyright &copy; <span id="year"></span> Eve Thompson Photography</p>
+</footer>
+
+<script>
+document.getElementById("year").textContent = new Date().getFullYear();
+
+// Add photos here as they're provided. Each entry needs a src (path under
+// assets/images/public-gallery/) and an alt description.
+var PUBLIC_GALLERY_IMAGES = [
+];
+
+(function () {
+var grid = document.getElementById("publicGalleryGrid");
+var emptyState = document.getElementById("publicGalleryEmpty");
+var lightbox = document.getElementById("lightbox");
+var lbImage = document.getElementById("lbImage");
+var lbCaption = document.getElementById("lbCaption");
+var currentIndex = 0;
+
+function renderGrid() {
+if (!PUBLIC_GALLERY_IMAGES.length) {
+emptyState.style.display = "block";
+grid.style.display = "none";
+return;
+}
+emptyState.style.display = "none";
+grid.style.display = "block";
+grid.innerHTML = "";
+PUBLIC_GALLERY_IMAGES.forEach(function (photo, i) {
+var tile = document.createElement("div");
+tile.className = "tile";
+var img = document.createElement("img");
+  img.src = photo.src;
+img.alt = photo.alt || "";
+img.loading = "lazy";
+img.addEventListener("click", function () { openLightbox(i); });
+tile.appendChild(img);
+grid.appendChild(tile);
+});
+}
+
+function openLightbox(index) {
+currentIndex = index;
+showCurrent();
+lightbox.classList.add("is-open");
+}
+
+function closeLightbox() {
+lightbox.classList.remove("is-open");
+}
+
+function showCurrent() {
+var photo = PUBLIC_GALLERY_IMAGES[currentIndex];
+lbImage.src = photo.src;
+lbImage.alt = photo.alt || "";
+lbCaption.textContent = photo.alt || "";
+}
+
+function showNext() {
+currentIndex = (currentIndex + 1) % PUBLIC_GALLERY_IMAGES.length;
+showCurrent();
+}
+
+function showPrev() {
+currentIndex = (currentIndex - 1 + PUBLIC_GALLERY_IMAGES.length) % PUBLIC_GALLERY_IMAGES.length;
+showCurrent();
+}
+
+document.getElementById("lightboxClose").addEventListener("click", closeLightbox);
+document.getElementById("lbNext").addEventListener("click", showNext);
+document.getElementById("lbPrev").addEventListener("click", showPrev);
+document.addEventListener("keydown", function (e) {
+if (!lightbox.classList.contains("is-open")) return;
+if (e.key === "Escape") closeLightbox();
+if (e.key === "ArrowRight") showNext();
+if (e.key === "ArrowLeft") showPrev();
+});
+
+renderGrid();
+})();
+</script>
+  </body>
+  </html>
+  
