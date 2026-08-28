@@ -597,3 +597,27 @@ button { font-family: inherit; cursor: pointer; }
 }
 
 .toast.is-visible { opacity: 1; }
+
+/* ---------------- Book a session: submission status ---------------- */
+
+.book-form__success {
+     grid-column: 1 / -1;
+     background: #f1f7f3;
+     border: 1px solid #cfe8d9;
+     border-radius: 6px;
+     padding: 16px 18px;
+     font-size: 0.9rem;
+     font-weight: 400;
+     color: var(--ink);
+     line-height: 1.6;
+}
+
+.book-form__error {
+     grid-column: 1 / -1;
+     color: var(--danger);
+     font-size: 0.85rem;
+     font-weight: 400;
+     line-height: 1.6;
+}
+
+.book-form__error a { text-decoration: underline; }
