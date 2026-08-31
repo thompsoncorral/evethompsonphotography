@@ -44,9 +44,9 @@ export async function onRequestGet({ env }) {
                         const detailData = await detailRes.json();
                         if (!detailRes.ok) return null;
 
-                                    const product = detailData.result.product;
-                        const variants = (detailData.result.variants || []).map((v) => ({
-                                    id: v.id, // this is the sync_variant_id used everywhere else
+                        const product = detailData.result.sync_product;
+                    const variants = (detailData.result.sync_variants || []).map((v) => ({
+                        id: v.id, // this is the sync_variant_id used everywhere else
                                     name: v.name,
                                     retail_price: v.retail_price,
                                     currency: v.currency || "USD",
