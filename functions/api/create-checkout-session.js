@@ -106,7 +106,8 @@ export async function onRequestPost({ request, env }) {
                         },
                         items: orderItems.map((i) => ({
                                     quantity: i.quantity,
-                                    sync_variant_id: i.sync_variant_id,
+                    // Printful's shipping/rates endpoint expects the item key named "variant_id" even for a sync variant's numeric id.
+                                                variant_id: i.sync_variant_id,
                         })),
               }),
       });
