@@ -45,9 +45,11 @@ export async function onRequestPost({ request, env }) {
                           },
                           items: items.map((i) => ({
                                       quantity: i.quantity,
-                                      // Printful's shipping/rates endpoint accepts sync_variant_id here
-                                      // when the id you have is a sync variant (which ours is).
-                                      sync_variant_id: i.variant_id,
+                    // Printful's shipping/rates endpoint expects the item key to
+                                                  // be named "variant_id" even when the numeric id you pass is
+                                                  // a sync variant id (confirmed empirically: sending
+                                                  // "sync_variant_id" here is rejected with "Missing item variant_id").
+                                                  variant_id: i.variant_id,
                           })),
                 }),
         });
