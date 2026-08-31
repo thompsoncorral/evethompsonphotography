@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Thank you! — Eve Thompson Photography</title>
+  <link rel="stylesheet" href="shop.css" />
+  <style>
+    .confirm-wrap { max-width: 480px; margin: 4rem auto; text-align: center; padding: 0 1.5rem; }
+    .confirm-wrap h1 { font-weight: 500; }
+  </style>
+</head>
+<body>
+  <div class="confirm-wrap">
+    <h1>Thank you for your order!</h1>
+    <p>Your payment was successful. You'll receive an email receipt from Stripe shortly, and we'll follow up once your order ships.</p>
+    <p><a href="/shop/index.html">&larr; Back to shop</a></p>
+  </div>
+  <script>
+    // Clear the cart now that payment has completed.
+    localStorage.removeItem("etp_cart_v1");
+  </script>
+</body>
+</html>
