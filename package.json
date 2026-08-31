@@ -1,0 +1,9 @@
+{
+    "name": "evethompsonphotography-shop",
+    "private": true,
+    "version": "1.0.0",
+    "description": "Printful + Stripe storefront functions for evethompsonphotography, deployed as Cloudflare Pages Functions.",
+    "dependencies": {
+          "stripe": "^16.8.0"
+    }
+}
