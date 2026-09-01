@@ -11,39 +11,72 @@ let activeFilter = "all";
 // ---------- categorization ----------
 // The Printful sync API (see functions/api/products.js) doesn't return a
 // clean "product type" field, so we group products by matching keywords in
-// their name. Order matters -- first match wins. Anything that doesn't match
-// falls into "Other" so new catalog items never disappear, they just show up
-// uncategorized until a rule is added for them.
-const CATEGORY_RULES = [
-  { key: "canvas", label: "Canvas Prints", test: /canvas/i },
-  { key: "playing-cards", label: "Playing Cards", test: /playing cards?/i },
-  { key: "pillows", label: "Pillows", test: /pillow|cushion/i },
-  { key: "framed-prints", label: "Framed Prints", test: /framed print|\bframe\b/i },
-  { key: "posters", label: "Posters & Art Prints", test: /poster|art print|fine art|matte print/i },
-  { key: "mugs", label: "Mugs", test: /\bmug\b/i },
-  { key: "apparel", label: "Apparel", test: /\b(t-?shirt|hoodie|sweatshirt|tee)\b/i },
-  { key: "bags", label: "Bags & Totes", test: /\btote\b|\bbag\b/i },
-  { key: "cards-stationery", label: "Cards & Stationery", test: /greeting card|postcard|notebook|stationery/i },
-];
-const OTHER_CATEGORY = { key: "other", label: "Other" };
+// their name.
+//
+// Matching priority and display order are deliberately separate:
+//   - MATCH priority goes narrow-to-broad, so a specific product type (e.g.
+//     "pillow") always wins over a broad material/style word that might
+//     also appear in its name (e.g. a "Canvas Throw Pillow" should land in
+//     Pillows, not Canvas Prints). "canvas" is checked last for this reason.
+//   - DISPLAY order is independent of match order -- Canvas Prints is
+//     pinned to the front regardless of where its rule sits in the match
+//     list.
+// Anything that matches no rule falls into "Other" so new catalog items
+// never disappear, they just show up uncategorized until a rule is added.
+const CATEGORY_LABELS = {
+  canvas: "Canvas Prints",
+  "playing-cards": "Playing Cards",
+  pillows: "Pillows",
+  "framed-prints": "Framed Prints",
+  posters: "Posters & Art Prints",
+  mugs: "Mugs",
+  apparel: "Apparel",
+  bags: "Bags & Totes",
+  "cards-stationery": "Cards & Stationery",
+  other: "Other",
+};
 
-function getCategory(productName) {
-  const rule = CATEGORY_RULES.find((r) => r.test.test(productName));
-  return rule || OTHER_CATEGORY;
+const CATEGORY_MATCH_ORDER = [
+  { key: "playing-cards", test: /playing cards?/i },
+  { key: "pillows", test: /pillow|cushion/i },
+  { key: "mugs", test: /\bmug\b/i },
+  { key: "apparel", test: /\b(t-?shirt|hoodie|sweatshirt|tee)\b/i },
+  { key: "bags", test: /\btote\b|\bbag\b/i },
+  { key: "cards-stationery", test: /greeting card|postcard|notebook|stationery/i },
+  { key: "framed-prints", test: /framed print|\bframe\b/i },
+  { key: "posters", test: /poster|art print|fine art|matte print/i },
+  { key: "canvas", test: /canvas/i }, // broad material word -- keep last
+];
+
+const CATEGORY_DISPLAY_ORDER = [
+  "canvas",
+  "playing-cards",
+  "pillows",
+  "framed-prints",
+  "posters",
+  "mugs",
+  "apparel",
+  "bags",
+  "cards-stationery",
+  "other",
+];
+
+function getCategoryKey(productName) {
+  const rule = CATEGORY_MATCH_ORDER.find((r) => r.test.test(productName));
+  return rule ? rule.key : "other";
 }
 
 function groupByCategory(products) {
   const groups = new Map();
   for (const product of products) {
-    const cat = getCategory(product.name);
-    if (!groups.has(cat.key)) groups.set(cat.key, { label: cat.label, products: [] });
-    groups.get(cat.key).products.push(product);
+    const key = getCategoryKey(product.name);
+    if (!groups.has(key)) groups.set(key, { label: CATEGORY_LABELS[key] || key, products: [] });
+    groups.get(key).products.push(product);
   }
-  // Order: known rules in their declared order, then "Other" last, skipping
-  // any category that has no products.
+  // Render in CATEGORY_DISPLAY_ORDER, skipping any category with no products.
   const ordered = [];
-  for (const rule of [...CATEGORY_RULES, OTHER_CATEGORY]) {
-    if (groups.has(rule.key)) ordered.push({ key: rule.key, ...groups.get(rule.key) });
+  for (const key of CATEGORY_DISPLAY_ORDER) {
+    if (groups.has(key)) ordered.push({ key, ...groups.get(key) });
   }
   return ordered;
 }
