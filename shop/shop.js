@@ -6,6 +6,47 @@
 const CART_KEY = "etp_cart_v1";
 let PRODUCTS = []; // cache of what /api/products returned
 let selectedRate = null;
+let activeFilter = "all";
+
+// ---------- categorization ----------
+// The Printful sync API (see functions/api/products.js) doesn't return a
+// clean "product type" field, so we group products by matching keywords in
+// their name. Order matters -- first match wins. Anything that doesn't match
+// falls into "Other" so new catalog items never disappear, they just show up
+// uncategorized until a rule is added for them.
+const CATEGORY_RULES = [
+  { key: "canvas", label: "Canvas Prints", test: /canvas/i },
+  { key: "playing-cards", label: "Playing Cards", test: /playing cards?/i },
+  { key: "pillows", label: "Pillows", test: /pillow|cushion/i },
+  { key: "framed-prints", label: "Framed Prints", test: /framed print|\bframe\b/i },
+  { key: "posters", label: "Posters & Art Prints", test: /poster|art print|fine art|matte print/i },
+  { key: "mugs", label: "Mugs", test: /\bmug\b/i },
+  { key: "apparel", label: "Apparel", test: /\b(t-?shirt|hoodie|sweatshirt|tee)\b/i },
+  { key: "bags", label: "Bags & Totes", test: /\btote\b|\bbag\b/i },
+  { key: "cards-stationery", label: "Cards & Stationery", test: /greeting card|postcard|notebook|stationery/i },
+];
+const OTHER_CATEGORY = { key: "other", label: "Other" };
+
+function getCategory(productName) {
+  const rule = CATEGORY_RULES.find((r) => r.test.test(productName));
+  return rule || OTHER_CATEGORY;
+}
+
+function groupByCategory(products) {
+  const groups = new Map();
+  for (const product of products) {
+    const cat = getCategory(product.name);
+    if (!groups.has(cat.key)) groups.set(cat.key, { label: cat.label, products: [] });
+    groups.get(cat.key).products.push(product);
+  }
+  // Order: known rules in their declared order, then "Other" last, skipping
+  // any category that has no products.
+  const ordered = [];
+  for (const rule of [...CATEGORY_RULES, OTHER_CATEGORY]) {
+    if (groups.has(rule.key)) ordered.push({ key: rule.key, ...groups.get(rule.key) });
+  }
+  return ordered;
+}
 
 // ---------- cart storage ----------
 
@@ -57,25 +98,83 @@ function money(n) {
   return `$${n.toFixed(2)}`;
 }
 
-function renderProducts() {
-  const grid = document.getElementById("product-grid");
-  if (PRODUCTS.length === 0) {
-    grid.innerHTML = `<p class="loading">No products found yet — add some in your Printful dashboard.</p>`;
-    return;
-  }
-  grid.innerHTML = "";
-  for (const product of PRODUCTS) {
-    const card = document.createElement("article");
-    card.className = "product-card";
-    const cheapest = Math.min(...product.variants.map((v) => parseFloat(v.retail_price)));
-    card.innerHTML = `
+function productCardHTML(product) {
+  const cheapest = Math.min(...product.variants.map((v) => parseFloat(v.retail_price)));
+  return `
+    <article class="product-card">
       <img src="${product.thumbnail || ""}" alt="${product.name}" loading="lazy" />
       <h3>${product.name}</h3>
       <p class="product-price">From ${money(cheapest)}</p>
       <button class="secondary-btn choose-btn" data-product-id="${product.id}">Choose options</button>
-    `;
-    grid.appendChild(card);
+    </article>
+  `;
+}
+
+function renderFilters(groups) {
+  const bar = document.getElementById("shop-filters");
+  if (groups.length <= 1) {
+    bar.hidden = true;
+    bar.innerHTML = "";
+    return;
   }
+  bar.hidden = false;
+  const pills = [{ key: "all", label: "All" }, ...groups.map((g) => ({ key: g.key, label: g.label }))];
+  bar.innerHTML = pills
+    .map(
+      (p) => `
+      <button
+        type="button"
+        class="filter-pill${p.key === activeFilter ? " active" : ""}"
+        data-filter="${p.key}"
+        aria-pressed="${p.key === activeFilter}"
+      >${p.label}</button>`
+    )
+    .join("");
+
+  bar.querySelectorAll(".filter-pill").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      activeFilter = btn.dataset.filter;
+      applyFilter();
+      bar.querySelectorAll(".filter-pill").forEach((b) => {
+        const isActive = b.dataset.filter === activeFilter;
+        b.classList.toggle("active", isActive);
+        b.setAttribute("aria-pressed", String(isActive));
+      });
+    });
+  });
+}
+
+function applyFilter() {
+  document.querySelectorAll(".product-row-section").forEach((section) => {
+    section.hidden = activeFilter !== "all" && section.dataset.category !== activeFilter;
+  });
+}
+
+function renderProducts() {
+  const grid = document.getElementById("product-grid");
+  if (PRODUCTS.length === 0) {
+    document.getElementById("shop-filters").hidden = true;
+    grid.innerHTML = `<p class="loading">No products found yet — add some in your Printful dashboard.</p>`;
+    return;
+  }
+
+  const groups = groupByCategory(PRODUCTS);
+  renderFilters(groups);
+
+  grid.innerHTML = groups
+    .map(
+      (group) => `
+      <section class="product-row-section" data-category="${group.key}">
+        <h2 class="product-row-heading">${group.label}</h2>
+        <div class="product-row">
+          ${group.products.map(productCardHTML).join("")}
+        </div>
+      </section>`
+    )
+    .join("");
+
+  applyFilter();
+
   grid.querySelectorAll(".choose-btn").forEach((btn) => {
     btn.addEventListener("click", () => openVariantModal(btn.dataset.productId));
   });
