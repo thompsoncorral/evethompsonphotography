@@ -33,7 +33,8 @@ const CATEGORY_LABELS = {
   apparel: "Apparel",
   bags: "Bags & Totes",
   "cards-stationery": "Cards & Stationery",
-  "luggage-mousepads": "Luggage Tags & Mouse Pads",
+  "luggage-tags": "Luggage Tags",
+  "mouse-pads": "Mouse Pads",
   other: "Other",
 };
 
@@ -42,7 +43,8 @@ const CATEGORY_MATCH_ORDER = [
   { key: "pillows", test: /pillow|cushion/i },
   { key: "mugs", test: /\bmug\b/i },
   { key: "apparel", test: /\b(t-?shirt|hoodie|sweatshirt|tee)\b/i },
-  { key: "luggage-mousepads", test: /luggage tag|mouse ?pad|mouse mat/i },
+  { key: "luggage-tags", test: /luggage tag/i },
+  { key: "mouse-pads", test: /mouse ?pad|mouse mat/i },
   { key: "bags", test: /\btote\b|\bbag\b/i },
   { key: "cards-stationery", test: /greeting card|postcard|notebook|stationery/i },
   { key: "framed-prints", test: /framed print|\bframe\b/i },
@@ -60,7 +62,8 @@ const CATEGORY_DISPLAY_ORDER = [
   "apparel",
   "bags",
   "cards-stationery",
-  "luggage-mousepads",
+  "luggage-tags",
+  "mouse-pads",
   "other",
 ];
 
