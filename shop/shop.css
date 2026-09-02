@@ -14,15 +14,23 @@ body {
     color: var(--ink);
 }
 
-/* Top banner. object-position is tuned so the bird's head/eye and the
-   signature both stay in view -- the source photo is 1920x1281, and its
-   crop is set to keep an ~y420-900 band centered regardless of banner
-   height, since object-fit: cover always fills the full width first (every
-   realistic banner is much wider-than-tall compared to the source photo),
-   so only the vertical position needs tuning. */
+/* Top banner. Uses aspect-ratio (not a vw-based height clamp) so the crop
+   window is identical at every viewport width -- with a plain height clamp,
+   object-fit: cover's effective zoom keeps increasing as the viewport gets
+   wider (the image has to scale up more to cover a proportionally shorter
+   box), which slowly pushes the visible window down and clips more off the
+   bottom the wider the screen is. Pinning height to a fixed multiple of
+   width keeps the same crop -- roughly y380-930 of the 1920x1281 source --
+   at every width, comfortably including both the bird's head/eye and the
+   full signature. min/max-height only guard the extremes (tiny phones,
+   ultra-wide monitors). */
 .shop-banner {
     width: 100%;
-    height: clamp(200px, 32vw, 420px);
+    aspect-ratio: 3.5 / 1;
+    min-height: 180px;
+    max-height: 800px; /* high enough that even ultra-wide monitors stay on
+                           the aspect-ratio line above and never trigger the
+                           crop-drift this cap exists to guard against */
     overflow: hidden;
     background: #000;
 }
@@ -30,7 +38,7 @@ body {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: center 51%;
+    object-position: center 52%;
     display: block;
 }
 
