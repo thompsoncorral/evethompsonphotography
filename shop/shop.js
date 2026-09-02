@@ -138,11 +138,15 @@ function money(n) {
 }
 
 function productCardHTML(product) {
-  const cheapest = Math.min(...product.variants.map((v) => parseFloat(v.retail_price)));
-  // "From $X" only makes sense when there's a range of options to choose
-  // from -- a single-variant product (no size/color choices) just has one
-  // price, so show it plain instead of implying options exist.
-  const priceLabel = product.variants.length > 1 ? `From ${money(cheapest)}` : money(cheapest);
+  const prices = product.variants.map((v) => parseFloat(v.retail_price));
+  const cheapest = Math.min(...prices);
+  // "From $X" only makes sense when picking a different option actually
+  // changes the price -- e.g. canvas prints cost more in larger sizes. A
+  // product like a t-shirt has multiple size variants but they're all the
+  // same price, so comparing min vs. max (not just counting variants)
+  // catches that case and shows the plain price instead.
+  const pricesVary = Math.max(...prices) > cheapest;
+  const priceLabel = pricesVary ? `From ${money(cheapest)}` : money(cheapest);
   return `
     <article class="product-card">
       <img src="${product.thumbnail || ""}" alt="${product.name}" loading="lazy" class="product-image" />
