@@ -54,16 +54,16 @@ const CATEGORY_MATCH_ORDER = [
 
 const CATEGORY_DISPLAY_ORDER = [
   "canvas",
-  "playing-cards",
+  "mouse-pads",
+  "luggage-tags",
   "pillows",
+  "playing-cards",
   "framed-prints",
   "posters",
   "mugs",
   "apparel",
   "bags",
   "cards-stationery",
-  "luggage-tags",
-  "mouse-pads",
   "other",
 ];
 
@@ -171,29 +171,29 @@ function renderFilters(groups) {
     return;
   }
   bar.hidden = false;
-  const pills = [{ key: "all", label: "All" }, ...groups.map((g) => ({ key: g.key, label: g.label }))];
-  bar.innerHTML = pills
-    .map(
-      (p) => `
-      <button
-        type="button"
-        class="filter-pill${p.key === activeFilter ? " active" : ""}"
-        data-filter="${p.key}"
-        aria-pressed="${p.key === activeFilter}"
-      >${p.label}</button>`
-    )
-    .join("");
 
-  bar.querySelectorAll(".filter-pill").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      activeFilter = btn.dataset.filter;
-      applyFilter();
-      bar.querySelectorAll(".filter-pill").forEach((b) => {
-        const isActive = b.dataset.filter === activeFilter;
-        b.classList.toggle("active", isActive);
-        b.setAttribute("aria-pressed", String(isActive));
-      });
-    });
+  // The dropdown's own option order is alphabetical by label, independent of
+  // CATEGORY_DISPLAY_ORDER (which controls the order the product sections
+  // appear on the page). "All" is pinned to the top since it doesn't
+  // meaningfully sort alongside category names.
+  const alphabetized = [...groups].sort((a, b) => a.label.localeCompare(b.label));
+  const options = [{ key: "all", label: "All" }, ...alphabetized];
+
+  bar.innerHTML = `
+    <label class="category-filter-label" for="category-filter">Category</label>
+    <select id="category-filter" class="category-filter">
+      ${options
+        .map(
+          (o) =>
+            `<option value="${o.key}"${o.key === activeFilter ? " selected" : ""}>${o.label}</option>`
+        )
+        .join("")}
+    </select>
+  `;
+
+  document.getElementById("category-filter").addEventListener("change", (e) => {
+    activeFilter = e.target.value;
+    applyFilter();
   });
 }
 

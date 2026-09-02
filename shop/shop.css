@@ -45,25 +45,32 @@ body {
 
 .shop-filters {
     display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
+    align-items: center;
+    gap: 0.6rem;
     padding: 1.25rem 2rem 0;
 }
-.filter-pill {
+.category-filter-label {
+    font-size: 0.85rem;
+    opacity: 0.7;
+}
+.category-filter {
     background: white;
     border: 1px solid var(--line);
     color: var(--ink);
-    padding: 0.4rem 0.9rem;
+    padding: 0.45rem 2rem 0.45rem 0.9rem;
     border-radius: 999px;
     cursor: pointer;
     font-size: 0.85rem;
+    font-family: inherit;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%232a2a28' stroke-width='1.5'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 0.7rem;
 }
-.filter-pill:hover { border-color: var(--accent); }
-.filter-pill.active {
-    background: var(--ink);
-    border-color: var(--ink);
-    color: var(--paper);
-}
+.category-filter:hover { border-color: var(--accent); }
+.category-filter:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
 
 .product-grid {
     padding: 2rem;
