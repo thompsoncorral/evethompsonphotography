@@ -135,12 +135,26 @@ function productCardHTML(product) {
   const cheapest = Math.min(...product.variants.map((v) => parseFloat(v.retail_price)));
   return `
     <article class="product-card">
-      <img src="${product.thumbnail || ""}" alt="${product.name}" loading="lazy" />
+      <img src="${product.thumbnail || ""}" alt="${product.name}" loading="lazy" class="product-image" />
       <h3>${product.name}</h3>
       <p class="product-price">From ${money(cheapest)}</p>
       <button class="secondary-btn choose-btn" data-product-id="${product.id}">Choose options</button>
     </article>
   `;
+}
+
+// ---------- image lightbox ----------
+
+function openLightbox(src, alt) {
+  if (!src) return;
+  document.getElementById("lightbox-img").src = src;
+  document.getElementById("lightbox-img").alt = alt || "";
+  document.getElementById("image-lightbox").hidden = false;
+}
+
+function closeLightbox() {
+  document.getElementById("image-lightbox").hidden = true;
+  document.getElementById("lightbox-img").src = "";
 }
 
 function renderFilters(groups) {
@@ -210,6 +224,10 @@ function renderProducts() {
 
   grid.querySelectorAll(".choose-btn").forEach((btn) => {
     btn.addEventListener("click", () => openVariantModal(btn.dataset.productId));
+  });
+
+  grid.querySelectorAll(".product-image").forEach((img) => {
+    img.addEventListener("click", () => openLightbox(img.src, img.alt));
   });
 }
 
@@ -428,6 +446,17 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   document.getElementById("shipping-form").addEventListener("submit", handleShippingSubmit);
   document.getElementById("checkout-btn").addEventListener("click", handleCheckout);
+
+  document.getElementById("lightbox-close").addEventListener("click", closeLightbox);
+  document.getElementById("image-lightbox").addEventListener("click", (e) => {
+    // Clicking the dark backdrop (not the image itself) also closes it.
+    if (e.target.id === "image-lightbox") closeLightbox();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !document.getElementById("image-lightbox").hidden) {
+      closeLightbox();
+    }
+  });
 
   if (new URLSearchParams(window.location.search).get("canceled")) {
     document.getElementById("load-error").hidden = false;

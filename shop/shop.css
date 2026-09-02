@@ -98,6 +98,7 @@ body {
     aspect-ratio: 1 / 1;
     object-fit: cover;
     background: var(--line);
+    cursor: zoom-in;
 }
 .product-card h3 { font-size: 1rem; margin: 0.75rem 0.5rem 0.25rem; font-weight: 500; }
 .product-price { margin: 0 0 0.75rem; opacity: 0.7; font-size: 0.9rem; }
@@ -167,6 +168,31 @@ body {
 
 .rates-list { margin-top: 0.75rem; display: flex; flex-direction: column; gap: 0.4rem; }
 .rate-option { font-size: 0.85rem; display: flex; align-items: center; gap: 0.5rem; }
+
+/* Image lightbox */
+.lightbox {
+    position: fixed; inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 50;
+    padding: 3rem 1.5rem;
+}
+.lightbox[hidden] { display: none; }
+.lightbox img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    border-radius: 8px;
+}
+.lightbox-close {
+    position: absolute;
+    top: 1rem; right: 1.5rem;
+    background: none; border: none;
+    color: white;
+    font-size: 2.5rem;
+    line-height: 1;
+    cursor: pointer;
+}
 
 /* Variant modal */
 .modal {
