@@ -139,11 +139,15 @@ function money(n) {
 
 function productCardHTML(product) {
   const cheapest = Math.min(...product.variants.map((v) => parseFloat(v.retail_price)));
+  // "From $X" only makes sense when there's a range of options to choose
+  // from -- a single-variant product (no size/color choices) just has one
+  // price, so show it plain instead of implying options exist.
+  const priceLabel = product.variants.length > 1 ? `From ${money(cheapest)}` : money(cheapest);
   return `
     <article class="product-card">
       <img src="${product.thumbnail || ""}" alt="${product.name}" loading="lazy" class="product-image" />
       <h3>${product.name}</h3>
-      <p class="product-price">From ${money(cheapest)}</p>
+      <p class="product-price">${priceLabel}</p>
       <button class="secondary-btn choose-btn" data-product-id="${product.id}">Choose options</button>
     </article>
   `;
