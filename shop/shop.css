@@ -14,6 +14,26 @@ body {
     color: var(--ink);
 }
 
+/* Top banner. object-position is tuned so the bird's head/eye and the
+   signature both stay in view -- the source photo is 1920x1281, and its
+   crop is set to keep an ~y420-900 band centered regardless of banner
+   height, since object-fit: cover always fills the full width first (every
+   realistic banner is much wider-than-tall compared to the source photo),
+   so only the vertical position needs tuning. */
+.shop-banner {
+    width: 100%;
+    height: clamp(200px, 32vw, 420px);
+    overflow: hidden;
+    background: #000;
+}
+.shop-banner__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 51%;
+    display: block;
+}
+
 .shop-header {
     display: flex;
     align-items: center;
