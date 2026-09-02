@@ -1,1 +1,117 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>Eve Thompson Photography</title><meta name="description" content="Eve Thompson Photography -- portrait, family, and event photography." /><link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin /><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&amp;display=swap" rel="stylesheet" /><link rel="stylesheet" href="assets/css/style.css" /></head><body><section class="home-hero-photo"><div class="home-hero-slideshow"><img class="home-hero-slide" src="assets/images/home-hero/DSC_6202.jpg" alt="Laughing child playing in the water during a family photography session" /><img class="home-hero-slide" src="assets/images/home-hero/DSC_6084.jpg" alt="Child blowing a stream of water during a playful outdoor session" /><img class="home-hero-slide" src="assets/images/home-hero/DSC_6100.jpg" alt="Water splashing over a child's face in golden light" /></div><div class="home-hero-overlay"></div><nav class="home-hero-nav"><div class="home-hero-nav__brand">Eve Thompson Photography</div><div class="home-hero-nav__links"><a href="index.html" class="home-hero-nav__link is-active">Home</a><a href="public-gallery.html" class="home-hero-nav__link">Public Gallery</a><a href="book.html" class="home-hero-nav__link">Book a Session</a><a href="https://shop.evethompsonphotography.com/shop/" class="home-hero-nav__link">Shop</a></div></nav><div class="home-hero-photo__content"><h1 class="home-hero-photo__title">Eve Thompson</h1><p class="home-hero-photo__subtitle">Photography</p><a class="home-hero-photo__cta" href="public-gallery.html">View Gallery</a></div></section><section class="home-about"><h2 class="home-about__heading">Theory</h2><p class="home-about__text">Every session is a chance to slow down and capture real connection -- candid smiles, quiet moments, and the little details that make your story yours. I keep things relaxed and unscripted, because that's when the best photographs happen.</p></section><section class="home-book"><a class="home-book__link" href="book.html">Book a Session</a></section><section class="home-social"><p class="home-social__label">Follow me on Instagram</p><p class="home-social__handle"><a href="https://www.instagram.com/evethompsonphotography/" target="_blank" rel="noopener">@evethompsonphotography</a></p><div class="home-social__feed"><script src="https://elfsightcdn.com/platform.js" async></script><div class="elfsight-app-f4373d4a-a37e-4b48-92d9-1aa5e1ea7a0d" data-elfsight-app-lazy></div></div></section><footer class="home-footer"><nav class="home-footer__nav"><a href="index.html">Home</a><a href="public-gallery.html">Public Gallery</a><a href="book.html">Book a Session</a><a href="https://shop.evethompsonphotography.com/shop/">Shop</a></nav><p class="home-footer__copyright">All content Copyright &copy; <span id="year"></span> Eve Thompson Photography</p></footer><script>document.getElementById("year").textContent = new Date().getFullYear();</script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prints & Products — Eve Thompson Photography</title>
+  <link rel="stylesheet" href="shop.css" />
+</head>
+<body>
+  <header class="shop-header">
+    <a href="https://evethompsonphotography.com/" class="back-link">&larr; Back to home</a>
+    <h1>Prints &amp; Products</h1>
+    <button id="cart-toggle" class="cart-toggle" aria-haspopup="true" aria-expanded="false">
+      Cart <span id="cart-count">0</span>
+    </button>
+  </header>
+
+  <p id="load-error" class="load-error" hidden></p>
+
+  <div id="shop-filters" class="shop-filters" role="group" aria-label="Filter by product type" hidden></div>
+
+  <main id="product-grid" class="product-grid" aria-live="polite">
+    <p class="loading">Loading products…</p>
+  </main>
+
+  <!-- Cart / checkout drawer -->
+  <aside id="cart-drawer" class="cart-drawer" aria-hidden="true">
+    <div class="cart-drawer-inner">
+      <div class="cart-drawer-head">
+        <h2>Your cart</h2>
+        <button id="cart-close" aria-label="Close cart">&times;</button>
+      </div>
+
+      <div id="cart-items" class="cart-items">
+        <p class="cart-empty">Your cart is empty.</p>
+      </div>
+
+      <div class="cart-subtotal">
+        <span>Subtotal</span>
+        <span id="cart-subtotal-amount">$0.00</span>
+      </div>
+
+      <section id="shipping-section" class="shipping-section" hidden>
+        <h3>Shipping details</h3>
+        <form id="shipping-form">
+          <label>Full name
+            <input type="text" name="name" required />
+          </label>
+          <label>Email
+            <input type="email" name="email" required />
+          </label>
+          <label>Address line 1
+            <input type="text" name="address1" required />
+          </label>
+          <label>Address line 2 (optional)
+            <input type="text" name="address2" />
+          </label>
+          <div class="field-row">
+            <label>City
+              <input type="text" name="city" required />
+            </label>
+            <label>State / region
+              <input type="text" name="state_code" placeholder="e.g. TX" />
+            </label>
+          </div>
+          <div class="field-row">
+            <label>ZIP / postal code
+              <input type="text" name="zip" required />
+            </label>
+            <label>Country code
+              <input type="text" name="country_code" placeholder="e.g. US" required maxlength="2" />
+            </label>
+          </div>
+          <label>Phone (optional)
+            <input type="tel" name="phone" />
+          </label>
+
+          <button type="submit" id="get-rates-btn" class="secondary-btn">Check shipping cost</button>
+        </form>
+
+        <div id="rates-list" class="rates-list" hidden></div>
+      </section>
+
+      <button id="checkout-btn" class="checkout-btn" disabled>
+        Continue to payment
+      </button>
+      <p class="checkout-note">You'll enter your card details securely on the next screen (powered by Stripe).</p>
+    </div>
+  </aside>
+  <div id="cart-overlay" class="cart-overlay" hidden></div>
+
+  <!-- Image lightbox: click a product photo to see it enlarged -->
+  <div id="image-lightbox" class="lightbox" hidden>
+    <button id="lightbox-close" class="lightbox-close" aria-label="Close">&times;</button>
+    <img id="lightbox-img" src="" alt="" />
+  </div>
+
+  <!-- Variant picker modal -->
+  <div id="variant-modal" class="modal" hidden>
+    <div class="modal-inner">
+      <button id="variant-modal-close" class="modal-close" aria-label="Close">&times;</button>
+      <img id="variant-modal-image" src="" alt="" />
+      <h2 id="variant-modal-title"></h2>
+      <label>Options
+        <select id="variant-select"></select>
+      </label>
+      <label>Quantity
+        <input type="number" id="variant-qty" value="1" min="1" />
+      </label>
+      <p id="variant-price" class="variant-price"></p>
+      <button id="variant-add-btn" class="checkout-btn">Add to cart</button>
+    </div>
+  </div>
+
+  <script src="shop.js"></script>
+</body>
+</html>
