@@ -43,8 +43,13 @@ export async function onRequestGet({ env, request, waitUntil }) {
   // ?refresh=1 forces a fresh Printful fetch past the edge cache -- an
   // escape hatch for right after publishing a design change in Printful,
   // rather than waiting up to 10 minutes to see it reflected.
-  const skipCache = new URL(request.url).searchParams.get("refresh") === "1";
-  const cached = skipCache ? null : await cache.match(cacheKey);
+  const requestUrl = new URL(request.url);
+  const skipCache = requestUrl.searchParams.get("refresh") === "1";
+  // Temporary: ?debug=1 attaches each product's raw file list (type +
+  // preview_url) to find out which file type is the actual product mockup
+  // vs. the flat print/design file. Implies refresh=1's cache bypass.
+  const debug = requestUrl.searchParams.get("debug") === "1";
+  const cached = skipCache || debug ? null : await cache.match(cacheKey);
   if (cached) return cached;
 
   try {
@@ -159,6 +164,7 @@ export async function onRequestGet({ env, request, waitUntil }) {
         return {
           id: product.id,
           name: product.name,
+          ...(debug ? { debugFiles: (detailData.result.sync_variants || [])[0]?.files || [] } : {}),
           // Prefer the variant's own preview image over Printful's
           // product-level thumbnail_url: thumbnail_url is a separate,
           // more slowly-updated field -- picking a new mockup style
@@ -184,7 +190,7 @@ export async function onRequestGet({ env, request, waitUntil }) {
     const response = new Response(JSON.stringify({ products }), {
       headers: { "Content-Type": "application/json", "Cache-Control": "public, max-age=600" },
     });
-    waitUntil(cache.put(cacheKey, response.clone()));
+    if (!debug) waitUntil(cache.put(cacheKey, response.clone()));
     return response;
   } catch (err) {
     return jsonError(500, { message: err.message });
