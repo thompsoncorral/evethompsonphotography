@@ -135,6 +135,8 @@ body {
     display: flex;
     align-items: center;
     gap: 0.6rem;
+    max-width: 1400px;
+    margin: 0 auto;
     padding: 1.25rem 2rem 0;
 }
 .category-filter-label {
@@ -161,6 +163,8 @@ body {
 .category-filter:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
 
 .product-grid {
+    max-width: 1400px;
+    margin: 0 auto;
     padding: 2rem;
 }
 .loading { text-align: center; opacity: 0.6; }
@@ -179,7 +183,12 @@ body {
 }
 .product-row {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    /* 220px packed as many as 7 tiny cards across an ultra-wide screen --
+       fine on mobile (this still collapses to a single column there) but
+       cramped on desktop, where other shops give each product noticeably
+       more room. 280px settles around 3-4 per row within the 1400px cap
+       above instead. */
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 1.5rem;
 }
 
