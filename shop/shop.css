@@ -197,8 +197,19 @@ body {
 .product-card img {
     width: 100%;
     aspect-ratio: 1 / 1;
-    object-fit: cover;
-    background: var(--line);
+    /* Printful's own product mockups vary in style -- some fill the frame
+       (an angled desk shot with the mouse pad and mouse both visible),
+       others center the product on a lot of white canvas (a flat on-white
+       mockup). object-fit: cover zoomed into that white canvas on the
+       latter, cropping away the product's shape/edges entirely and
+       leaving what looked like a plain cropped photo instead of a
+       recognizable product. contain always shows the whole mockup --
+       product shape included -- at the cost of a little padding around
+       images that already fill the frame; the white card background
+       (below) makes that padding invisible for Printful's white-canvas
+       mockups. */
+    object-fit: contain;
+    background: white;
     cursor: zoom-in;
 }
 .product-image-badge {
@@ -345,7 +356,7 @@ body {
     width: min(380px, 90%); position: relative; text-align: center;
 }
 .modal-close { position: absolute; top: 0.5rem; right: 0.75rem; background: none; border: none; font-size: 1.5rem; cursor: pointer; }
-.modal-inner img { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 8px; margin-bottom: 0.75rem; background: var(--line); }
+.modal-inner img { width: 100%; aspect-ratio: 1/1; object-fit: contain; border-radius: 8px; margin-bottom: 0.75rem; background: white; }
 .modal-inner label { display: block; text-align: left; font-size: 0.85rem; margin: 0.5rem 0 0.25rem; }
 .modal-inner select, .modal-inner input { width: 100%; padding: 0.5rem; border-radius: 6px; border: 1px solid var(--line); }
 .variant-price { font-weight: 600; margin: 0.75rem 0; }
