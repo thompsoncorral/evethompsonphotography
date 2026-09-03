@@ -4,9 +4,25 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Prints & Products — Eve Thompson Photography</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="shop.css" />
 </head>
 <body>
+  <header class="topbar">
+    <div class="topbar__brand">Eve Thompson Photography</div>
+    <nav class="topbar__nav">
+      <a href="https://evethompsonphotography.com/" class="topbar__navlink">Home</a>
+      <a href="https://evethompsonphotography.com/public-gallery.html" class="topbar__navlink">Public Gallery</a>
+      <a href="https://evethompsonphotography.com/book.html" class="topbar__navlink">Book a Session</a>
+      <a href="index.html" class="topbar__navlink is-active">Shop</a>
+    </nav>
+    <button id="cart-toggle" class="cart-toggle" aria-haspopup="true" aria-expanded="false">
+      Cart <span id="cart-count">0</span>
+    </button>
+  </header>
+
   <div class="shop-banner">
     <img
       src="shop-banner.jpg"
@@ -15,13 +31,10 @@
     />
   </div>
 
-  <header class="shop-header">
-    <a href="https://evethompsonphotography.com/" class="back-link">&larr; Back to home</a>
-    <h1>Prints &amp; Products</h1>
-    <button id="cart-toggle" class="cart-toggle" aria-haspopup="true" aria-expanded="false">
-      Cart <span id="cart-count">0</span>
-    </button>
-  </header>
+  <div class="shop-intro">
+    <h1 class="shop-intro__title">Prints &amp; Products</h1>
+    <p class="shop-intro__subtitle">Museum-quality prints and gifts made from my photography, printed on demand and shipped straight to your door.</p>
+  </div>
 
   <p id="load-error" class="load-error" hidden></p>
 
@@ -30,6 +43,46 @@
   <main id="product-grid" class="product-grid" aria-live="polite">
     <p class="loading">Loading products…</p>
   </main>
+
+  <section class="shop-faq" aria-labelledby="shop-faq-heading">
+    <h2 id="shop-faq-heading" class="shop-faq__heading">Frequently Asked Questions</h2>
+    <div class="shop-faq__list">
+      <details class="shop-faq__item">
+        <summary>How long will my order take to arrive?</summary>
+        <p>Every item is made to order, so please allow a little extra time compared to a store shelf. Most products are printed within 2–7 business days (mugs, posters, and accessories are usually quickest; apparel and larger wall art can take closer to the higher end), then ship via USPS, UPS, or FedEx, adding another 3–8 business days within the US. You'll get an email with tracking as soon as it's on its way.</p>
+      </details>
+      <details class="shop-faq__item">
+        <summary>What if my item arrives damaged, misprinted, or wrong?</summary>
+        <p>That's on me to make right — just email me a photo of the issue within 30 days of delivery and I'll get you a free replacement or a full refund, no need to send anything back.</p>
+      </details>
+      <details class="shop-faq__item">
+        <summary>Can I return or exchange an item if I change my mind or ordered the wrong size?</summary>
+        <p>Because each piece is printed specifically for your order, I'm not able to offer returns or exchanges for a change of mind or an incorrect size/color selection. Please double-check sizing before ordering — I'm always happy to help you choose if you're unsure, just reach out first.</p>
+      </details>
+      <details class="shop-faq__item">
+        <summary>Do you ship internationally?</summary>
+        <p>Yes — most items can ship both within the US and to many countries abroad. Exact shipping cost and delivery estimate are calculated at checkout once you enter your address.</p>
+      </details>
+      <details class="shop-faq__item">
+        <summary>How do I track my order?</summary>
+        <p>As soon as your order ships you'll receive an email with a tracking link, so you can follow it the whole way to your door.</p>
+      </details>
+      <details class="shop-faq__item">
+        <summary>How do I see sizes and color options for a product?</summary>
+        <p>Tap "Choose options" on any product to see every available size, color, and variant along with its price.</p>
+      </details>
+    </div>
+  </section>
+
+  <footer class="home-footer">
+    <nav class="home-footer__nav">
+      <a href="https://evethompsonphotography.com/">Home</a>
+      <a href="https://evethompsonphotography.com/public-gallery.html">Public Gallery</a>
+      <a href="https://evethompsonphotography.com/book.html">Book a Session</a>
+      <a href="index.html">Shop</a>
+    </nav>
+    <p class="home-footer__copyright">All content Copyright &copy; <span id="year"></span> Eve Thompson Photography</p>
+  </footer>
 
   <!-- Cart / checkout drawer -->
   <aside id="cart-drawer" class="cart-drawer" aria-hidden="true">
@@ -97,10 +150,12 @@
   </aside>
   <div id="cart-overlay" class="cart-overlay" hidden></div>
 
-  <!-- Image lightbox: click a product photo to see it enlarged -->
+  <!-- Image lightbox: click a product photo to see it enlarged, with prev/next when a product has more than one image -->
   <div id="image-lightbox" class="lightbox" hidden>
     <button id="lightbox-close" class="lightbox-close" aria-label="Close">&times;</button>
+    <button id="lightbox-prev" class="lightbox-arrow lightbox-arrow--prev" aria-label="Previous image" hidden>&#8249;</button>
     <img id="lightbox-img" src="" alt="" />
+    <button id="lightbox-next" class="lightbox-arrow lightbox-arrow--next" aria-label="Next image" hidden>&#8250;</button>
   </div>
 
   <!-- Variant picker modal -->

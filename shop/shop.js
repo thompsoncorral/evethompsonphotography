@@ -147,9 +147,18 @@ function productCardHTML(product) {
   // catches that case and shows the plain price instead.
   const pricesVary = Math.max(...prices) > cheapest;
   const priceLabel = pricesVary ? `From ${money(cheapest)}` : money(cheapest);
+  // Some products have more than one real photo (e.g. a front + back
+  // mockup, or several mockup styles picked in the Printful dashboard) --
+  // when that's the case, hint at it with a small badge so the product grid
+  // reads a bit more like a real store instead of one flat thumbnail each.
+  const galleryCount = product.images ? product.images.length : 0;
+  const badge = galleryCount > 1 ? `<span class="product-image-badge">${galleryCount} photos</span>` : "";
   return `
     <article class="product-card">
-      <img src="${product.thumbnail || ""}" alt="${product.name}" loading="lazy" class="product-image" />
+      <div class="product-image-wrap">
+        <img src="${product.thumbnail || ""}" alt="${product.name}" loading="lazy" class="product-image" data-product-id="${product.id}" />
+        ${badge}
+      </div>
       <h3>${product.name}</h3>
       <p class="product-price">${priceLabel}</p>
       <button class="secondary-btn choose-btn" data-product-id="${product.id}">Choose options</button>
@@ -158,17 +167,45 @@ function productCardHTML(product) {
 }
 
 // ---------- image lightbox ----------
+// Supports a single image (the common case) or a small gallery with
+// prev/next arrows, when a product has more than one real photo.
 
-function openLightbox(src, alt) {
-  if (!src) return;
-  document.getElementById("lightbox-img").src = src;
-  document.getElementById("lightbox-img").alt = alt || "";
+let lightboxImages = [];
+let lightboxIndex = 0;
+
+function openLightbox(images, startIndex, alt) {
+  lightboxImages = (images || []).filter(Boolean);
+  if (lightboxImages.length === 0) return;
+  lightboxIndex = Math.max(0, Math.min(startIndex || 0, lightboxImages.length - 1));
+  showLightboxImage(alt);
   document.getElementById("image-lightbox").hidden = false;
+}
+
+function showLightboxImage(alt) {
+  const img = document.getElementById("lightbox-img");
+  img.src = lightboxImages[lightboxIndex];
+  if (alt !== undefined) img.alt = alt || "";
+  const multi = lightboxImages.length > 1;
+  document.getElementById("lightbox-prev").hidden = !multi;
+  document.getElementById("lightbox-next").hidden = !multi;
+}
+
+function showPrevImage() {
+  if (lightboxImages.length < 2) return;
+  lightboxIndex = (lightboxIndex - 1 + lightboxImages.length) % lightboxImages.length;
+  showLightboxImage();
+}
+
+function showNextImage() {
+  if (lightboxImages.length < 2) return;
+  lightboxIndex = (lightboxIndex + 1) % lightboxImages.length;
+  showLightboxImage();
 }
 
 function closeLightbox() {
   document.getElementById("image-lightbox").hidden = true;
   document.getElementById("lightbox-img").src = "";
+  lightboxImages = [];
 }
 
 function renderFilters(groups) {
@@ -241,7 +278,11 @@ function renderProducts() {
   });
 
   grid.querySelectorAll(".product-image").forEach((img) => {
-    img.addEventListener("click", () => openLightbox(img.src, img.alt));
+    img.addEventListener("click", () => {
+      const product = PRODUCTS.find((p) => String(p.id) === String(img.dataset.productId));
+      const images = product && product.images && product.images.length ? product.images : [img.src];
+      openLightbox(images, 0, img.alt);
+    });
   });
 }
 
@@ -462,15 +503,27 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("checkout-btn").addEventListener("click", handleCheckout);
 
   document.getElementById("lightbox-close").addEventListener("click", closeLightbox);
+  document.getElementById("lightbox-prev").addEventListener("click", (e) => {
+    e.stopPropagation();
+    showPrevImage();
+  });
+  document.getElementById("lightbox-next").addEventListener("click", (e) => {
+    e.stopPropagation();
+    showNextImage();
+  });
   document.getElementById("image-lightbox").addEventListener("click", (e) => {
     // Clicking the dark backdrop (not the image itself) also closes it.
     if (e.target.id === "image-lightbox") closeLightbox();
   });
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && !document.getElementById("image-lightbox").hidden) {
-      closeLightbox();
-    }
+    if (document.getElementById("image-lightbox").hidden) return;
+    if (e.key === "Escape") closeLightbox();
+    if (e.key === "ArrowLeft") showPrevImage();
+    if (e.key === "ArrowRight") showNextImage();
   });
+
+  const yearEl = document.getElementById("year");
+  if (yearEl) yearEl.textContent = new Date().getFullYear();
 
   if (new URLSearchParams(window.location.search).get("canceled")) {
     document.getElementById("load-error").hidden = false;

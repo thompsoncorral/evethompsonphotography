@@ -1,8 +1,14 @@
+/* Palette matched to the main site (assets/css/style.css) so the shop feels
+   like part of evethompsonphotography.com rather than a bolted-on tool.
+   --accent and --line keep their original names (used throughout this file
+   below) but now carry the main site's --accent-warm / --hairline values. */
 :root {
-    --ink: #2a2a28;
-    --paper: #faf8f5;
-    --accent: #8a6d5c;
-    --line: #e4ddd4;
+    --ink: #1a1a1a;
+    --ink-soft: #555;
+    --paper: #ffffff;
+    --cream: #f5f3f0;
+    --accent: #a07656;
+    --line: #e6e6e6;
 }
 
 * { box-sizing: border-box; }
@@ -12,6 +18,70 @@ body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     background: var(--paper);
     color: var(--ink);
+}
+
+/* ---------------- Top bar (matches the main site's .topbar) ---------------- */
+.topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding: 22px 32px;
+    border-bottom: 1px solid var(--line);
+}
+.topbar__brand {
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    font-size: 1.05rem;
+    white-space: nowrap;
+}
+.topbar__nav {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+.topbar__navlink {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--ink-soft);
+    text-decoration: none;
+    padding: 4px 0;
+    border-bottom: 2px solid transparent;
+}
+.topbar__navlink:hover { color: var(--ink); }
+.topbar__navlink.is-active { color: var(--ink); border-bottom-color: var(--ink); }
+
+@media (max-width: 640px) {
+    .topbar {
+        flex-wrap: wrap;
+        row-gap: 10px;
+        padding: 18px 20px;
+    }
+    .topbar__nav {
+        row-gap: 10px;
+        gap: 10px 18px;
+    }
+}
+
+/* ---------------- Shop title/intro (below the banner) ---------------- */
+.shop-intro {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 48px 32px 8px;
+    text-align: center;
+}
+.shop-intro__title {
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-size: 2.4rem;
+    font-weight: 500;
+    margin: 0 0 14px;
+    color: var(--ink);
+}
+.shop-intro__subtitle {
+    margin: 0;
+    color: var(--ink-soft);
+    line-height: 1.7;
 }
 
 /* Top banner. Uses aspect-ratio (not a vw-based height clamp) so the crop
@@ -41,16 +111,6 @@ body {
     object-position: center 52%;
     display: block;
 }
-
-.shop-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1.5rem 2rem;
-    border-bottom: 1px solid var(--line);
-}
-.shop-header h1 { font-size: 1.3rem; margin: 0; font-weight: 500; letter-spacing: 0.02em; }
-.back-link { color: var(--ink); text-decoration: none; font-size: 0.9rem; opacity: 0.7; }
 
 .cart-toggle {
     background: var(--ink);
@@ -108,8 +168,11 @@ body {
 .product-row-section { margin-bottom: 2.5rem; }
 .product-row-section:last-child { margin-bottom: 0; }
 .product-row-heading {
-    font-size: 1.05rem;
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-size: 1.3rem;
     font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
     margin: 0 0 1rem;
     padding-bottom: 0.5rem;
     border-bottom: 1px solid var(--line);
@@ -128,12 +191,27 @@ body {
     text-align: center;
     padding-bottom: 1rem;
 }
+.product-image-wrap {
+    position: relative;
+}
 .product-card img {
     width: 100%;
     aspect-ratio: 1 / 1;
     object-fit: cover;
     background: var(--line);
     cursor: zoom-in;
+}
+.product-image-badge {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    background: rgba(26, 26, 26, 0.72);
+    color: #fff;
+    font-size: 0.7rem;
+    letter-spacing: 0.02em;
+    padding: 3px 9px;
+    border-radius: 999px;
+    pointer-events: none;
 }
 .product-card h3 { font-size: 1rem; margin: 0.75rem 0.5rem 0.25rem; font-weight: 500; }
 .product-price { margin: 0 0 0.75rem; opacity: 0.7; font-size: 0.9rem; }
@@ -228,6 +306,23 @@ body {
     line-height: 1;
     cursor: pointer;
 }
+.lightbox-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    font-size: 1.6rem;
+    line-height: 1;
+    color: var(--ink);
+    cursor: pointer;
+}
+.lightbox-arrow[hidden] { display: none; }
+.lightbox-arrow--prev { left: 16px; }
+.lightbox-arrow--next { right: 16px; }
 
 /* Variant modal */
 .modal {
@@ -244,3 +339,75 @@ body {
 .modal-inner label { display: block; text-align: left; font-size: 0.85rem; margin: 0.5rem 0 0.25rem; }
 .modal-inner select, .modal-inner input { width: 100%; padding: 0.5rem; border-radius: 6px; border: 1px solid var(--line); }
 .variant-price { font-weight: 600; margin: 0.75rem 0; }
+
+/* ---------------- FAQ ---------------- */
+.shop-faq {
+    background: var(--cream);
+    padding: 64px 32px;
+    margin-top: 3rem;
+}
+.shop-faq__heading {
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-size: 2rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    text-align: center;
+    margin: 0 0 32px;
+    color: var(--ink);
+}
+.shop-faq__list {
+    max-width: 720px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+.shop-faq__item {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 0.9rem 1.1rem;
+}
+.shop-faq__item summary {
+    cursor: pointer;
+    font-weight: 600;
+    list-style: none;
+}
+.shop-faq__item summary::-webkit-details-marker { display: none; }
+.shop-faq__item summary::after {
+    content: "+";
+    float: right;
+    font-weight: 400;
+    color: var(--accent);
+}
+.shop-faq__item[open] summary::after { content: "\2212"; }
+.shop-faq__item p {
+    margin: 0.75rem 0 0.1rem;
+    color: var(--ink-soft);
+    line-height: 1.6;
+    font-size: 0.95rem;
+}
+
+/* ---------------- Footer (matches the main site's .home-footer) ---------------- */
+.home-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 32px;
+    border-top: 1px solid var(--line);
+    flex-wrap: wrap;
+    gap: 12px;
+}
+.home-footer__nav a {
+    margin-right: 20px;
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    text-decoration: none;
+}
+.home-footer__nav a:hover { color: var(--ink); }
+.home-footer__copyright {
+    font-size: 0.8rem;
+    color: var(--ink-soft);
+}
