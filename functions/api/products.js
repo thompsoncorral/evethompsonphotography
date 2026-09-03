@@ -43,13 +43,8 @@ export async function onRequestGet({ env, request, waitUntil }) {
   // ?refresh=1 forces a fresh Printful fetch past the edge cache -- an
   // escape hatch for right after publishing a design change in Printful,
   // rather than waiting up to 10 minutes to see it reflected.
-  const requestUrl = new URL(request.url);
-  const skipCache = requestUrl.searchParams.get("refresh") === "1";
-  // Temporary: ?debug=1 attaches each product's raw file list (type +
-  // preview_url) to find out which file type is the actual product mockup
-  // vs. the flat print/design file. Implies refresh=1's cache bypass.
-  const debug = requestUrl.searchParams.get("debug") === "1";
-  const cached = skipCache || debug ? null : await cache.match(cacheKey);
+  const skipCache = new URL(request.url).searchParams.get("refresh") === "1";
+  const cached = skipCache ? null : await cache.match(cacheKey);
   if (cached) return cached;
 
   try {
@@ -125,16 +120,26 @@ export async function onRequestGet({ env, request, waitUntil }) {
         const product = detailData.result.sync_product;
         const variants = (detailData.result.sync_variants || []).map((v) => {
           const files = v.files || [];
-          // A variant can carry more than one preview image --
-          // e.g. apparel with front + back printing gets a
-          // separate mockup for each placement, and a product
-          // with multiple mockup styles selected in the
-          // Printful dashboard can have several. Collect every
-          // preview_url so the storefront can show a small
-          // gallery instead of just one flat thumbnail; when
-          // there's only one (the common case), this is just a
-          // one-item array and nothing changes visually.
-          const images = [...new Set(files.map((f) => f.preview_url).filter(Boolean))];
+          // Every variant carries (at least) two files per print
+          // placement: a "default" file, which is the flat print/design
+          // file itself (just the uploaded photo, cropped to the print
+          // area -- no product visible), and a "preview" file, which is
+          // Printful's actual mockup showing the design applied to the
+          // physical product (e.g. the rounded-corner mouse pad shape on
+          // a white background). Only "preview" files are meant for
+          // shoppers to see -- taking preview_url from every file
+          // regardless of type was showing the flat design as the
+          // thumbnail (Printful lists "default" first) instead of a
+          // recognizable photo of the product. A product with more than
+          // one preview -- e.g. apparel with front + back printing, or
+          // multiple mockup styles picked in the Printful dashboard --
+          // gets a small gallery; when there's only one (the common
+          // case), this is just a one-item array.
+          const previewFiles = files.filter((f) => f.type === "preview" && f.preview_url);
+          // Fall back to any file's preview_url in the unexpected case a
+          // variant has no "preview" file at all, so a product never ends
+          // up with no image whatsoever.
+          const images = [...new Set((previewFiles.length ? previewFiles : files).map((f) => f.preview_url).filter(Boolean))];
 
           return {
             id: v.id, // this is the sync_variant_id used everywhere else
@@ -164,7 +169,6 @@ export async function onRequestGet({ env, request, waitUntil }) {
         return {
           id: product.id,
           name: product.name,
-          ...(debug ? { debugFiles: (detailData.result.sync_variants || [])[0]?.files || [] } : {}),
           // Prefer the variant's own preview image over Printful's
           // product-level thumbnail_url: thumbnail_url is a separate,
           // more slowly-updated field -- picking a new mockup style
@@ -190,7 +194,7 @@ export async function onRequestGet({ env, request, waitUntil }) {
     const response = new Response(JSON.stringify({ products }), {
       headers: { "Content-Type": "application/json", "Cache-Control": "public, max-age=600" },
     });
-    if (!debug) waitUntil(cache.put(cacheKey, response.clone()));
+    waitUntil(cache.put(cacheKey, response.clone()));
     return response;
   } catch (err) {
     return jsonError(500, { message: err.message });
