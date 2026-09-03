@@ -73,7 +73,14 @@ export async function onRequestGet({ env }) {
                                     return {
                                                 id: product.id,
                                                 name: product.name,
-                                                thumbnail: product.thumbnail_url || variants[0]?.image || null,
+                                                // Prefer the variant's own preview image over Printful's
+                                                // product-level thumbnail_url: thumbnail_url is a separate,
+                                                // more slowly-updated field -- picking a new mockup style
+                                                // for a product in the Printful dashboard updates the
+                                                // variant's preview files right away, but doesn't reliably
+                                                // update thumbnail_url along with it, which left the shop
+                                                // showing an old mockup even after the image was changed.
+                                                thumbnail: variants[0]?.image || product.thumbnail_url || null,
                                                 // Default gallery for the product card + lightbox: the
                                                 // first variant's images (usually front/back mockups of
                                                 // the default color/size). Color variants each have their
