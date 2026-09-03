@@ -45,24 +45,41 @@ export async function onRequestGet({ env }) {
                         if (!detailRes.ok) return null;
 
                         const product = detailData.result.sync_product;
-                    const variants = (detailData.result.sync_variants || []).map((v) => ({
-                        id: v.id, // this is the sync_variant_id used everywhere else
+                    const variants = (detailData.result.sync_variants || []).map((v) => {
+                        const files = v.files || [];
+                        // A variant can carry more than one preview image --
+                        // e.g. apparel with front + back printing gets a
+                        // separate mockup for each placement, and a product
+                        // with multiple mockup styles selected in the
+                        // Printful dashboard can have several. Collect every
+                        // preview_url so the storefront can show a small
+                        // gallery instead of just one flat thumbnail; when
+                        // there's only one (the common case), this is just a
+                        // one-item array and nothing changes visually.
+                        const images = [...new Set(files.map((f) => f.preview_url).filter(Boolean))];
+
+                        return {
+                            id: v.id, // this is the sync_variant_id used everywhere else
                                     name: v.name,
                                     retail_price: v.retail_price,
                                     currency: v.currency || "USD",
                                     sku: v.sku,
                                     in_stock: v.availability_status !== "discontinued",
-                                    image:
-                                                  (v.files || []).find((f) => f.type === "preview")?.preview_url ||
-                                                  (v.files || [])[0]?.preview_url ||
-                                                  product.thumbnail_url ||
-                                                  null,
-                        }));
+                                    images,
+                                    image: images[0] || product.thumbnail_url || null,
+                        };
+                    });
 
                                     return {
                                                 id: product.id,
                                                 name: product.name,
                                                 thumbnail: product.thumbnail_url || variants[0]?.image || null,
+                                                // Default gallery for the product card + lightbox: the
+                                                // first variant's images (usually front/back mockups of
+                                                // the default color/size). Color variants each have their
+                                                // own mockups, picked up when a shopper opens "Choose
+                                                // options" and switches color.
+                                                images: variants[0]?.images || [],
                                                 variants,
                                     };
               })
