@@ -281,6 +281,16 @@ body {
 
 .rates-list { margin-top: 0.75rem; display: flex; flex-direction: column; gap: 0.4rem; }
 .rate-option { font-size: 0.85rem; display: flex; align-items: center; gap: 0.5rem; }
+.phone-required-note {
+    margin-top: 0.6rem;
+    padding: 0.6rem 0.75rem;
+    background: #fdecea;
+    border: 1px solid #f3c2bd;
+    border-radius: 8px;
+    color: #7a2e26;
+    font-size: 0.8rem;
+}
+.phone-required-note[hidden] { display: none; }
 
 /* Image lightbox */
 .lightbox {

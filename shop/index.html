@@ -137,7 +137,7 @@
               <input type="text" name="country_code" placeholder="e.g. US" required maxlength="2" />
             </label>
           </div>
-          <label>Phone (optional)
+          <label>Phone (required for express shipping)
             <input type="tel" name="phone" />
           </label>
 
@@ -145,6 +145,7 @@
         </form>
 
         <div id="rates-list" class="rates-list" hidden></div>
+        <p id="phone-required-note" class="phone-required-note" hidden>This shipping option requires a phone number for the carrier — please add one above to continue.</p>
       </section>
 
       <button id="checkout-btn" class="checkout-btn" disabled>

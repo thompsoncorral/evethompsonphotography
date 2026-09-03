@@ -343,6 +343,7 @@ function renderCart() {
   // Any cart change invalidates a previously-picked shipping rate.
   selectedRate = null;
   document.getElementById("rates-list").hidden = true;
+  document.getElementById("phone-required-note").hidden = true;
   checkoutBtn.disabled = true;
 }
 
@@ -392,6 +393,38 @@ function openVariantModal(productId) {
 
 // ---------- shipping + checkout ----------
 
+// Express/expedited carrier services (UPS, FedEx, DHL, etc.) generally
+// require a recipient phone number -- Printful's order API rejects the
+// order without one, which would otherwise only surface *after* the
+// customer has already paid via Stripe. Phone stays optional for standard
+// shipping and is only enforced when a rate like this is actually chosen.
+function isExpressRate(rate) {
+  return /express|expedited|priority|overnight|next[- ]?day|rush/i.test((rate && rate.name) || "");
+}
+
+function currentPhoneValue() {
+  const input = document.querySelector('#shipping-form input[name="phone"]');
+  return input ? input.value.trim() : "";
+}
+
+// Keeps the checkout button + warning note in sync with both the selected
+// rate and whatever's currently typed in the phone field (not just whatever
+// was in the form the last time "Check shipping cost" was submitted).
+function updateCheckoutAvailability() {
+  const note = document.getElementById("phone-required-note");
+  const checkoutBtn = document.getElementById("checkout-btn");
+
+  if (!selectedRate) {
+    checkoutBtn.disabled = true;
+    note.hidden = true;
+    return;
+  }
+
+  const needsPhone = isExpressRate(selectedRate) && !currentPhoneValue();
+  note.hidden = !needsPhone;
+  checkoutBtn.disabled = needsPhone;
+}
+
 async function handleShippingSubmit(e) {
   e.preventDefault();
   const form = e.target;
@@ -428,12 +461,12 @@ async function handleShippingSubmit(e) {
       .join("");
 
     selectedRate = data.rates[0] || null;
-    document.getElementById("checkout-btn").disabled = !selectedRate;
+    updateCheckoutAvailability();
 
     list.querySelectorAll('input[name="rate"]').forEach((input) => {
       input.addEventListener("change", () => {
         selectedRate = data.rates.find((r) => r.id === input.value);
-        document.getElementById("checkout-btn").disabled = !selectedRate;
+        updateCheckoutAvailability();
       });
     });
   } catch (err) {
@@ -447,6 +480,16 @@ async function handleShippingSubmit(e) {
 async function handleCheckout() {
   const cart = loadCart();
   if (cart.length === 0 || !selectedRate || !window.__recipient) return;
+
+  // Refresh phone from the live field (not just whatever was in the form
+  // the last time "Check shipping cost" was submitted) and re-check --
+  // the button should already be disabled in this case, but don't rely on
+  // that alone for something that would otherwise fail only after payment.
+  window.__recipient.phone = currentPhoneValue();
+  if (isExpressRate(selectedRate) && !window.__recipient.phone) {
+    updateCheckoutAvailability();
+    return;
+  }
 
   const btn = document.getElementById("checkout-btn");
   btn.disabled = true;
@@ -501,6 +544,9 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   document.getElementById("shipping-form").addEventListener("submit", handleShippingSubmit);
   document.getElementById("checkout-btn").addEventListener("click", handleCheckout);
+  document
+    .querySelector('#shipping-form input[name="phone"]')
+    .addEventListener("input", updateCheckoutAvailability);
 
   document.getElementById("lightbox-close").addEventListener("click", closeLightbox);
   document.getElementById("lightbox-prev").addEventListener("click", (e) => {
