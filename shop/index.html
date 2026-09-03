@@ -2,6 +2,17 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <!-- This same shop page also gets served statically from evethompsonphotography.com
+       (GitHub Pages), which can't run the serverless function that loads products --
+       only shop.evethompsonphotography.com (Cloudflare Pages) can. If someone lands
+       here on the wrong host (an old link, a bookmark, a typed URL), send them to the
+       host where the shop actually works, instead of showing a permanent "couldn't
+       load products" error. -->
+  <script>
+    if (location.hostname === "evethompsonphotography.com" || location.hostname === "www.evethompsonphotography.com") {
+      location.replace("https://shop.evethompsonphotography.com" + location.pathname + location.search + location.hash);
+    }
+  </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Prints & Products — Eve Thompson Photography</title>
   <meta name="description" content="Museum-quality prints and gifts made from Eve Thompson's photography -- canvas, mugs, pillows, and more, printed on demand and shipped to your door." />
