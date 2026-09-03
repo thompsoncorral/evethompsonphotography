@@ -48,7 +48,11 @@ export async function onRequestGet({ env, request, waitUntil }) {
   // limiting itself -- fewer runs means fewer chances to collide with it.
   const cacheKey = new Request(new URL(request.url).origin + "/api/products", request);
           const cache = caches.default;
-          const cached = await cache.match(cacheKey);
+          // ?refresh=1 forces a fresh Printful fetch past the edge cache -- an
+                // escape hatch for right after publishing a design change in
+                // Printful, rather than waiting up to 10 minutes to see it reflected.
+                const skipCache = new URL(request.url).searchParams.get("refresh") === "1";
+                const cached = skipCache ? null : await cache.match(cacheKey);
           if (cached) return cached;
 
   try {
