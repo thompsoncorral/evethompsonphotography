@@ -70,6 +70,31 @@ export async function onRequestGet({ env }) {
                         };
                     });
 
+                                    // 3. Look up Printful's own description for the underlying
+                                    // catalog product (fabric, fit, care instructions -- the same
+                                    // generic copy for every seller using that blank item, since
+                                    // Printful has no field for a seller-specific description tied
+                                    // to a design). Uses the first sync variant's catalog variant_id
+                                    // -- present already on the /sync/products/{id} response, no
+                                    // extra lookup needed -- to fetch it via GET /products/variant/{id}.
+                                    // Best-effort: if this fails or the shape isn't what's expected,
+                                    // the product still renders fine, just without a description.
+                                    const firstCatalogVariantId = (detailData.result.sync_variants || [])[0]?.variant_id || null;
+                                    let description = null;
+                                    if (firstCatalogVariantId) {
+                                                try {
+                                                                const catalogRes = await fetch(`${PRINTFUL_BASE}/products/variant/${firstCatalogVariantId}`, {
+                                                                                    headers: printfulHeaders(env),
+                                                                });
+                                                                if (catalogRes.ok) {
+                                                                                    const catalogData = await catalogRes.json();
+                                                                                    description = catalogData.result?.product?.description || null;
+                                                                }
+                                                } catch {
+                                                                // swallow -- description is a nice-to-have, not worth failing the product for
+                                                }
+                                    }
+
                                     return {
                                                 id: product.id,
                                                 name: product.name,
@@ -87,6 +112,7 @@ export async function onRequestGet({ env }) {
                                                 // own mockups, picked up when a shopper opens "Choose
                                                 // options" and switches color.
                                                 images: variants[0]?.images || [],
+                                                description,
                                                 variants,
                                     };
               })
