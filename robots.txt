@@ -1,0 +1,5 @@
+User-agent: *
+Disallow: /gallery.html
+Disallow: /collections.html
+
+Sitemap: https://evethompsonphotography.com/sitemap.xml
