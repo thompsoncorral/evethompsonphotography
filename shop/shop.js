@@ -380,6 +380,22 @@ function openVariantModal(productId) {
   select.onchange = updatePrice;
   updatePrice();
 
+  // Printful's own material/fit/care description for the blank product --
+  // generic to the item, not specific to this design, so it's tucked away
+  // as an expandable "Product details" rather than shown up front. Not
+  // every product has one (best-effort lookup server-side), so hide the
+  // whole section when there's nothing to show.
+  const detailsEl = document.getElementById("variant-details");
+  const detailsBody = document.getElementById("variant-details-body");
+  if (product.description) {
+    detailsBody.innerHTML = product.description;
+    detailsEl.hidden = false;
+    detailsEl.open = false;
+  } else {
+    detailsBody.innerHTML = "";
+    detailsEl.hidden = true;
+  }
+
   document.getElementById("variant-qty").value = 1;
   document.getElementById("variant-add-btn").onclick = () => {
     const v = product.variants.find((v) => String(v.id) === select.value);
