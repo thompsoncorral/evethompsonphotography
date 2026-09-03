@@ -183,13 +183,13 @@ body {
 }
 .product-row {
     display: grid;
-    /* 220px packed as many as 7 tiny cards across an ultra-wide screen --
-       fine on mobile (this still collapses to a single column there) but
-       cramped on desktop, where other shops give each product noticeably
-       more room. 280px settles around 3-4 per row within the 1400px cap
-       above instead. */
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1.5rem;
+    /* 220px packed as many as 7 tiny cards across an ultra-wide screen, and
+       an earlier pass at 280px still landed 4 across on a typical laptop --
+       both cramped compared to other shops. 360px settles around 3 per row
+       within the 1400px cap above, giving each product noticeably more
+       room (still collapses to a single column on mobile, same as before). */
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: 2rem;
 }
 
 .product-card {
