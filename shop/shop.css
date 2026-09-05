@@ -104,14 +104,16 @@ body {
 
 /* Clickable banner inviting shoppers to submit their own photo for a custom
    item (see shop/custom-order/). Sits between the title and the product
-   grid so it reads as an option alongside the catalog, not an interruption. */
+   grid so it reads as an option alongside the catalog, not an interruption.
+   Sized to its own content (like a button) and pushed to the right edge of
+   the page rather than stretched full-width and centered. */
 .custom-order-banner {
     display: flex;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: center;
     gap: 12px;
-    max-width: 640px;
-    margin: 0 auto 32px;
+    width: fit-content;
+    margin: 0 32px 32px auto;
     padding: 16px 24px;
     background: var(--cream);
     border: 1px solid var(--line);
@@ -138,7 +140,7 @@ body {
         flex-direction: column;
         text-align: center;
         gap: 6px;
-        margin-bottom: 24px;
+        margin: 0 auto 24px;
     }
 }
 
