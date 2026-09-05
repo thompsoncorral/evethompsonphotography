@@ -183,6 +183,10 @@ body {
     margin: 3rem 0 1.5rem;
 }
 .product-row-heading {
+    /* Hidden per request -- the category name (e.g. "Canvas Prints") no
+       longer shows above each product row. To bring headings back later,
+       just delete this line. */
+    display: none;
     font-family: "Cormorant Garamond", Georgia, serif;
     font-size: 1.3rem;
     font-weight: 500;
