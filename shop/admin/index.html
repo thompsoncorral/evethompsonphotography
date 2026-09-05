@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <script>
+    if (location.hostname === "evethompsonphotography.com" || location.hostname === "www.evethompsonphotography.com") {
+      location.replace("https://shop.evethompsonphotography.com" + location.pathname + location.search + location.hash);
+    }
+  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Custom Order Admin — Eve Thompson Photography</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="icon" href="../../assets/images/favicon.png" type="image/png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../shop.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar__brand">Eve Thompson Photography</div>
+    <nav class="topbar__nav">
+      <a href="../index.html" class="topbar__navlink">Shop</a>
+    </nav>
+  </header>
+
+  <!-- Login gate -->
+  <main id="login-view" class="narrow-page" hidden>
+    <div class="page-card admin-login-card">
+      <h1 class="narrow-page__title" style="font-size:1.4rem;">Admin Login</h1>
+      <form id="login-form" novalidate>
+        <label class="form-field">
+          <span>Password</span>
+          <input type="password" name="password" required autofocus />
+        </label>
+        <button type="submit" id="login-btn" class="form-submit-btn">Log in</button>
+      </form>
+      <div id="login-message" class="form-message" hidden></div>
+    </div>
+  </main>
+
+  <!-- Dashboard -->
+  <main id="dashboard-view" class="narrow-page" style="max-width: 820px;" hidden>
+    <div class="admin-header">
+      <h1 class="narrow-page__title" style="margin:0; text-align:left; font-size:1.5rem;">Custom Order Submissions</h1>
+      <button id="logout-btn" class="admin-logout-btn">Log out</button>
+    </div>
+    <div id="submissions-list"></div>
+    <p id="empty-state" class="narrow-page__intro" hidden>No submissions yet. Once someone uses the custom order form, they'll show up here.</p>
+  </main>
+
+  <script>
+    const loginView = document.getElementById("login-view");
+    const dashboardView = document.getElementById("dashboard-view");
+    const loginForm = document.getElementById("login-form");
+    const loginBtn = document.getElementById("login-btn");
+    const loginMessage = document.getElementById("login-message");
+    const listEl = document.getElementById("submissions-list");
+    const emptyState = document.getElementById("empty-state");
+
+    function showLogin() {
+      loginView.hidden = false;
+      dashboardView.hidden = true;
+    }
+
+    function showDashboard() {
+      loginView.hidden = true;
+      dashboardView.hidden = false;
+    }
+
+    function fmtDate(iso) {
+      try {
+        return new Date(iso).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
+      } catch {
+        return iso;
+      }
+    }
+
+    function statusLabel(status) {
+      return { new: "New", reviewed: "Reviewed", archived: "Archived" }[status] || status;
+    }
+
+    function submissionCardHTML(s) {
+      const photoUrl = `/api/admin-photo?key=${encodeURIComponent(s.photoKey)}`;
+      return `
+        <article class="submission-card" data-id="${s.id}">
+          <img class="submission-card__photo" src="${photoUrl}" alt="Photo submitted by ${escapeHTML(s.name)}" loading="lazy" />
+          <div>
+            <div class="submission-card__top">
+              <p class="submission-card__name">${escapeHTML(s.name)}</p>
+              <span class="status-pill status-pill--${s.status}">${statusLabel(s.status)}</span>
+            </div>
+            <p class="submission-card__meta">
+              <a href="mailto:${escapeHTML(s.email)}">${escapeHTML(s.email)}</a> &middot; ${fmtDate(s.submittedAt)}
+            </p>
+            <p class="submission-card__desc">${escapeHTML(s.description)}</p>
+            <div class="submission-card__actions">
+              ${s.status !== "reviewed" ? `<button class="pill-btn" data-action="reviewed">Mark reviewed</button>` : ""}
+              ${s.status !== "archived" ? `<button class="pill-btn" data-action="archived">Archive</button>` : ""}
+              ${s.status !== "new" ? `<button class="pill-btn" data-action="new">Mark new</button>` : ""}
+            </div>
+            <div class="link-generator">
+              <input type="text" class="product-id-input" placeholder="Printful product ID" />
+              <button class="pill-btn generate-link-btn" type="button">Generate private link</button>
+              <div class="link-generator__result" hidden>
+                <input type="text" class="link-result" readonly />
+                <button class="pill-btn copy-link-btn" type="button">Copy</button>
+              </div>
+            </div>
+          </div>
+        </article>
+      `;
+    }
+
+    function escapeHTML(str) {
+      const div = document.createElement("div");
+      div.textContent = str == null ? "" : String(str);
+      return div.innerHTML;
+    }
+
+    async function loadSubmissions() {
+      const res = await fetch("/api/admin-submissions");
+      if (res.status === 401) {
+        showLogin();
+        return;
+      }
+      const data = await res.json();
+      showDashboard();
+      renderSubmissions(data.submissions || []);
+    }
+
+    function renderSubmissions(submissions) {
+      if (submissions.length === 0) {
+        listEl.innerHTML = "";
+        emptyState.hidden = false;
+        return;
+      }
+      emptyState.hidden = true;
+      listEl.innerHTML = submissions.map(submissionCardHTML).join("");
+
+      listEl.querySelectorAll(".submission-card").forEach((card) => {
+        const id = card.dataset.id;
+
+        card.querySelectorAll("[data-action]").forEach((btn) => {
+          btn.addEventListener("click", async () => {
+            btn.disabled = true;
+            try {
+              const res = await fetch("/api/admin-mark-status", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ id, status: btn.dataset.action }),
+              });
+              if (!res.ok) throw new Error();
+              await loadSubmissions();
+            } catch {
+              btn.disabled = false;
+              alert("Couldn't update that -- please try again.");
+            }
+          });
+        });
+
+        const generateBtn = card.querySelector(".generate-link-btn");
+        const productIdInput = card.querySelector(".product-id-input");
+        const resultWrap = card.querySelector(".link-generator__result");
+        const resultInput = card.querySelector(".link-result");
+        const copyBtn = card.querySelector(".copy-link-btn");
+
+        generateBtn.addEventListener("click", async () => {
+          const productId = productIdInput.value.trim();
+          if (!productId) {
+            alert("Enter the Printful product ID first.");
+            return;
+          }
+          generateBtn.disabled = true;
+          generateBtn.textContent = "Generating…";
+          try {
+            const res = await fetch("/api/admin-generate-link", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ productId }),
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Couldn't generate a link.");
+            resultInput.value = data.url;
+            resultWrap.hidden = false;
+          } catch (err) {
+            alert(err.message);
+          } finally {
+            generateBtn.disabled = false;
+            generateBtn.textContent = "Generate private link";
+          }
+        });
+
+        copyBtn.addEventListener("click", async () => {
+          try {
+            await navigator.clipboard.writeText(resultInput.value);
+            copyBtn.textContent = "Copied!";
+            setTimeout(() => (copyBtn.textContent = "Copy"), 1500);
+          } catch {
+            resultInput.select();
+          }
+        });
+      });
+    }
+
+    loginForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      loginMessage.hidden = true;
+      loginBtn.disabled = true;
+      loginBtn.textContent = "Logging in…";
+      try {
+        const res = await fetch("/api/admin-login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ password: loginForm.password.value }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Incorrect password");
+        loginForm.reset();
+        await loadSubmissions();
+      } catch (err) {
+        loginMessage.hidden = false;
+        loginMessage.className = "form-message form-message--error";
+        loginMessage.textContent = err.message;
+      } finally {
+        loginBtn.disabled = false;
+        loginBtn.textContent = "Log in";
+      }
+    });
+
+    document.getElementById("logout-btn").addEventListener("click", async () => {
+      await fetch("/api/admin-logout", { method: "POST" });
+      showLogin();
+    });
+
+    loadSubmissions();
+  </script>
+</body>
+</html>
