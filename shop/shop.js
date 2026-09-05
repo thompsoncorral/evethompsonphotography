@@ -69,6 +69,11 @@ const STORY_BANNERS = {
     alt: "The beauty was already there. I simply captured it.",
     position: "after",
   },
+  "mouse-pads": {
+    src: "banners/mouse-pads-banner.png",
+    alt: "Every day items turned into art.",
+    position: "after",
+  },
 };
 
 const CATEGORY_MATCH_ORDER = [
