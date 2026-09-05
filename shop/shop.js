@@ -92,6 +92,14 @@ const CATEGORY_MATCH_ORDER = [
   { key: "canvas", test: /canvas/i }, // broad material word -- keep last
 ];
 
+// Categories to leave out of the shop entirely for now -- e.g. a category
+// with too few products to feel like a real section yet. Products in a
+// hidden category simply don't appear anywhere on the page (not even
+// dumped into "Other"). To bring one back, just remove its key here.
+const HIDDEN_CATEGORIES = new Set([
+  "apparel", // only one shirt so far -- hide until there's a fuller lineup
+]);
+
 const CATEGORY_DISPLAY_ORDER = [
   "canvas",
   "mouse-pads",
@@ -120,6 +128,7 @@ function groupByCategory(products) {
   const groups = new Map();
   for (const product of products) {
     const key = getCategoryKey(product.name);
+    if (HIDDEN_CATEGORIES.has(key)) continue;
     if (!groups.has(key)) groups.set(key, { label: CATEGORY_LABELS[key] || key, products: [] });
     groups.get(key).products.push(product);
   }
