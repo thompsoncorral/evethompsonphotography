@@ -40,6 +40,22 @@ const CATEGORY_LABELS = {
   other: "Other",
 };
 
+// ---------- story banners ----------
+// A handful of categories are curated "story" sections rather than ordinary
+// filterable groups: each gets a themed banner image and is pinned so it's
+// always visible near the bottom of the page, regardless of which filter is
+// active -- and it's left out of the category dropdown entirely (there's
+// nothing to filter to when it's already always showing).
+// To add another one: drop the banner image in shop/banners/, add an entry
+// below, and give its category key a spot near the end of
+// CATEGORY_DISPLAY_ORDER.
+const STORY_BANNERS = {
+  backpacks: {
+    src: "banners/backpacks-banner.png",
+    alt: "Some moments are meant to be witnessed. Others are meant to be remembered.",
+  },
+};
+
 const CATEGORY_MATCH_ORDER = [
   { key: "playing-cards", test: /playing cards?/i },
   { key: "pillows", test: /pillow|cushion/i },
@@ -67,10 +83,12 @@ const CATEGORY_DISPLAY_ORDER = [
   "posters",
   "mugs",
   "apparel",
-  "backpacks",
   "bags",
   "cards-stationery",
   "other",
+  // Story-banner categories (see STORY_BANNERS) go last -- always the
+  // bottom-most section on the page, banner and all.
+  "backpacks",
 ];
 
 function getCategoryKey(productName) {
@@ -216,7 +234,11 @@ function closeLightbox() {
 
 function renderFilters(groups) {
   const bar = document.getElementById("shop-filters");
-  if (groups.length <= 1) {
+  // Story-banner categories (see STORY_BANNERS) are pinned, always-visible
+  // sections -- they're never filterable, so they're left out of the
+  // dropdown and don't count toward whether the dropdown is worth showing.
+  const filterable = groups.filter((g) => !(g.key in STORY_BANNERS));
+  if (filterable.length <= 1) {
     bar.hidden = true;
     bar.innerHTML = "";
     return;
@@ -227,7 +249,7 @@ function renderFilters(groups) {
   // CATEGORY_DISPLAY_ORDER (which controls the order the product sections
   // appear on the page). "All" is pinned to the top since it doesn't
   // meaningfully sort alongside category names.
-  const alphabetized = [...groups].sort((a, b) => a.label.localeCompare(b.label));
+  const alphabetized = [...filterable].sort((a, b) => a.label.localeCompare(b.label));
   const options = [{ key: "all", label: "All" }, ...alphabetized];
 
   bar.innerHTML = `
@@ -250,6 +272,12 @@ function renderFilters(groups) {
 
 function applyFilter() {
   document.querySelectorAll(".product-row-section").forEach((section) => {
+    // Story-banner categories (see STORY_BANNERS) are pinned -- always
+    // visible regardless of which filter is active.
+    if (section.dataset.category in STORY_BANNERS) {
+      section.hidden = false;
+      return;
+    }
     section.hidden = activeFilter !== "all" && section.dataset.category !== activeFilter;
   });
 }
@@ -266,15 +294,20 @@ function renderProducts() {
   renderFilters(groups);
 
   grid.innerHTML = groups
-    .map(
-      (group) => `
+    .map((group) => {
+      const banner = STORY_BANNERS[group.key];
+      const bannerHTML = banner
+        ? `<img src="${banner.src}" alt="${banner.alt}" class="story-banner" loading="lazy" />`
+        : "";
+      return `
+      ${bannerHTML}
       <section class="product-row-section" data-category="${group.key}">
         <h2 class="product-row-heading">${group.label}</h2>
         <div class="product-row">
           ${group.products.map(productCardHTML).join("")}
         </div>
-      </section>`
-    )
+      </section>`;
+    })
     .join("");
 
   applyFilter();

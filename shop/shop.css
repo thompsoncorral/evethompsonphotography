@@ -171,6 +171,17 @@ body {
 
 .product-row-section { margin-bottom: 2.5rem; }
 .product-row-section:last-child { margin-bottom: 0; }
+
+/* Story banners -- see STORY_BANNERS in shop.js. Contained within the
+   product grid's own width (not edge-to-edge), shown at the image's natural
+   proportions so nothing gets cropped. */
+.story-banner {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin: 3rem 0 1.5rem;
+}
 .product-row-heading {
     font-family: "Cormorant Garamond", Georgia, serif;
     font-size: 1.3rem;
