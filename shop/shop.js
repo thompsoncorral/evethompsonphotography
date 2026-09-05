@@ -107,7 +107,7 @@ const HIDDEN_CATEGORIES = new Set([
 // position back into the middle copy whenever it strays into copy 1 or copy
 // 3 (see initCarousels()), so from the shopper's point of view there's no
 // visible seam. To add another one, just add its category key here.
-const CAROUSEL_CATEGORIES = new Set(["luggage-tags"]);
+const CAROUSEL_CATEGORIES = new Set(["luggage-tags", "mouse-pads"]);
 
 const CATEGORY_DISPLAY_ORDER = [
   "canvas",
