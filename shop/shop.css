@@ -84,6 +84,46 @@ body {
     line-height: 1.7;
 }
 
+/* Clickable banner inviting shoppers to submit their own photo for a custom
+   item (see shop/custom-order/). Sits between the title and the product
+   grid so it reads as an option alongside the catalog, not an interruption. */
+.custom-order-banner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    max-width: 640px;
+    margin: 0 auto 32px;
+    padding: 16px 24px;
+    background: var(--cream);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    text-decoration: none;
+    color: var(--ink);
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+.custom-order-banner:hover {
+    border-color: var(--accent);
+    background: #f0ece6;
+}
+.custom-order-banner__text {
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+.custom-order-banner__arrow {
+    font-size: 1.2rem;
+    color: var(--accent);
+    flex-shrink: 0;
+}
+@media (max-width: 480px) {
+    .custom-order-banner {
+        flex-direction: column;
+        text-align: center;
+        gap: 6px;
+        margin-bottom: 24px;
+    }
+}
+
 /* Top banner. Uses aspect-ratio (not a vw-based height clamp) so the crop
    window is identical at every viewport width -- with a plain height clamp,
    object-fit: cover's effective zoom keeps increasing as the viewport gets
