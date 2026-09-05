@@ -41,18 +41,33 @@ const CATEGORY_LABELS = {
 };
 
 // ---------- story banners ----------
-// A handful of categories are curated "story" sections rather than ordinary
-// filterable groups: each gets a themed banner image and is pinned so it's
-// always visible near the bottom of the page, regardless of which filter is
-// active -- and it's left out of the category dropdown entirely (there's
-// nothing to filter to when it's already always showing).
+// A handful of categories get a themed banner image woven into the page to
+// give the shop more of a narrative feel. Two flavors:
+//   - pinned: true  -- the category becomes an always-visible "story"
+//     section (currently just Backpacks): it's pulled out of normal
+//     filtering entirely, left out of the category dropdown, and always
+//     shown regardless of which filter is active. Give it a spot near the
+//     end of CATEGORY_DISPLAY_ORDER so it settles at the bottom of the page.
+//   - pinned not set (or false) -- an ordinary divider banner attached to a
+//     still-fully-filterable category (currently Canvas Prints): it shows
+//     and hides together with that category's own section, it just also
+//     stays in the dropdown like normal.
+// `position` controls whether the banner renders above ("before", the
+// default) or below ("after") the category's product section.
 // To add another one: drop the banner image in shop/banners/, add an entry
-// below, and give its category key a spot near the end of
+// below, and (if pinned) give its category key a spot near the end of
 // CATEGORY_DISPLAY_ORDER.
 const STORY_BANNERS = {
   backpacks: {
     src: "banners/backpacks-banner.png",
     alt: "Some moments are meant to be witnessed. Others are meant to be remembered.",
+    position: "before",
+    pinned: true,
+  },
+  canvas: {
+    src: "banners/canvas-banner.png",
+    alt: "The beauty was already there. I simply captured it.",
+    position: "after",
   },
 };
 
@@ -234,10 +249,12 @@ function closeLightbox() {
 
 function renderFilters(groups) {
   const bar = document.getElementById("shop-filters");
-  // Story-banner categories (see STORY_BANNERS) are pinned, always-visible
+  // Pinned story-banner categories (see STORY_BANNERS) are always-visible
   // sections -- they're never filterable, so they're left out of the
   // dropdown and don't count toward whether the dropdown is worth showing.
-  const filterable = groups.filter((g) => !(g.key in STORY_BANNERS));
+  // A non-pinned story banner (e.g. Canvas Prints) stays a normal,
+  // filterable category and is NOT excluded here.
+  const filterable = groups.filter((g) => !STORY_BANNERS[g.key]?.pinned);
   if (filterable.length <= 1) {
     bar.hidden = true;
     bar.innerHTML = "";
@@ -271,14 +288,18 @@ function renderFilters(groups) {
 }
 
 function applyFilter() {
-  document.querySelectorAll(".product-row-section").forEach((section) => {
-    // Story-banner categories (see STORY_BANNERS) are pinned -- always
-    // visible regardless of which filter is active.
-    if (section.dataset.category in STORY_BANNERS) {
-      section.hidden = false;
+  // Story banners (see STORY_BANNERS) carry the same data-category as the
+  // section they belong to, so a divider banner (e.g. Canvas Prints' "after"
+  // banner) hides and shows right along with its section.
+  document.querySelectorAll(".product-row-section, .story-banner").forEach((el) => {
+    const category = el.dataset.category;
+    // Pinned story categories (see STORY_BANNERS) are always visible
+    // regardless of which filter is active.
+    if (STORY_BANNERS[category]?.pinned) {
+      el.hidden = false;
       return;
     }
-    section.hidden = activeFilter !== "all" && section.dataset.category !== activeFilter;
+    el.hidden = activeFilter !== "all" && category !== activeFilter;
   });
 }
 
@@ -296,17 +317,20 @@ function renderProducts() {
   grid.innerHTML = groups
     .map((group) => {
       const banner = STORY_BANNERS[group.key];
-      const bannerHTML = banner
-        ? `<img src="${banner.src}" alt="${banner.alt}" class="story-banner" loading="lazy" />`
+      const bannerImg = banner
+        ? `<img src="${banner.src}" alt="${banner.alt}" class="story-banner" data-category="${group.key}" loading="lazy" />`
         : "";
+      const beforeHTML = banner && banner.position !== "after" ? bannerImg : "";
+      const afterHTML = banner && banner.position === "after" ? bannerImg : "";
       return `
-      ${bannerHTML}
+      ${beforeHTML}
       <section class="product-row-section" data-category="${group.key}">
         <h2 class="product-row-heading">${group.label}</h2>
         <div class="product-row">
           ${group.products.map(productCardHTML).join("")}
         </div>
-      </section>`;
+      </section>
+      ${afterHTML}`;
     })
     .join("");
 
