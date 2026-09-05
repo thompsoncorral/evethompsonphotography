@@ -1,5 +1,5 @@
 // POST /api/custom-order  (multipart/form-data: name, email, description,
-// rightsConfirmed, photo)
+// rightsConfirmed, publicityConfirmed, photo)
 // Handles a submission from /shop/custom-order/ -- a customer's own photo
 // plus what they'd like it made into. Nothing here is public or automatic:
 // the photo goes into private R2 storage and the details into KV, both only
@@ -27,6 +27,7 @@ export async function onRequestPost({ request, env }) {
   const email = (form.get("email") || "").toString().trim();
   const description = (form.get("description") || "").toString().trim();
   const rightsConfirmed = form.get("rightsConfirmed") === "true";
+  const publicityConfirmed = form.get("publicityConfirmed") === "true";
   const photo = form.get("photo");
 
   if (!name || !email || !description) {
@@ -37,6 +38,9 @@ export async function onRequestPost({ request, env }) {
   }
   if (!rightsConfirmed) {
     return jsonError(400, "Please confirm you own the rights to this photo (or have permission to use it) before submitting.");
+  }
+  if (!publicityConfirmed) {
+    return jsonError(400, "Please confirm you have permission to use anyone else's image shown in the photo before submitting.");
   }
   if (!photo || typeof photo === "string") {
     return jsonError(400, "Please attach a photo.");
@@ -63,6 +67,7 @@ export async function onRequestPost({ request, env }) {
       email,
       description,
       rightsConfirmed: true,
+      publicityConfirmed: true,
       submittedAt: new Date().toISOString(),
       photoKey,
       photoContentType: photo.type || "application/octet-stream",
