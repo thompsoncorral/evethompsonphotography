@@ -522,3 +522,272 @@ body {
     font-size: 0.8rem;
     color: var(--ink-soft);
 }
+
+/* ==========================================================================
+   Custom orders: the intake form (/shop/custom-order/), the private
+   product reveal page (/shop/custom/), and the password-protected admin
+   review page (/shop/admin/). Shared "page card" look across all three so
+   they read as one feature even though they're three separate pages.
+   ========================================================================== */
+
+.narrow-page {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem 5rem;
+}
+.narrow-page__title {
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-size: 2rem;
+    font-weight: 500;
+    margin: 0 0 0.5rem;
+    text-align: center;
+}
+.narrow-page__intro {
+    text-align: center;
+    color: var(--ink-soft);
+    line-height: 1.6;
+    margin: 0 0 2.5rem;
+}
+
+.page-card {
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 2rem;
+}
+
+.form-field {
+    display: block;
+    margin-bottom: 1.25rem;
+    font-size: 0.9rem;
+}
+.form-field > span {
+    display: block;
+    margin-bottom: 0.4rem;
+    font-weight: 500;
+}
+.form-field input[type="text"],
+.form-field input[type="email"],
+.form-field input[type="password"],
+.form-field textarea {
+    width: 100%;
+    padding: 0.65rem 0.8rem;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    box-sizing: border-box;
+}
+.form-field input:focus,
+.form-field textarea:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+    border-color: var(--accent);
+}
+.form-field textarea { resize: vertical; min-height: 5.5rem; }
+.form-field input[type="file"] { font-size: 0.9rem; }
+.form-hint {
+    display: block;
+    margin-top: 0.35rem;
+    font-size: 0.8rem;
+    color: var(--ink-soft);
+}
+
+.form-checkbox {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: var(--ink-soft);
+    margin-bottom: 1.5rem;
+}
+.form-checkbox input { margin-top: 0.2rem; flex-shrink: 0; }
+
+.form-submit-btn {
+    background: var(--ink);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    width: 100%;
+}
+.form-submit-btn:hover { background: var(--accent); }
+.form-submit-btn:disabled { opacity: 0.6; cursor: default; }
+
+.form-message {
+    margin-top: 1.25rem;
+    padding: 0.9rem 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+.form-message--success { background: #eef6ee; color: #2b5a2b; border: 1px solid #cfe6cf; }
+.form-message--error { background: #fbeaea; color: #8a2c2c; border: 1px solid #f0caca; }
+
+.photo-preview {
+    margin-top: 0.75rem;
+    max-width: 220px;
+    border-radius: 8px;
+    display: block;
+    border: 1px solid var(--line);
+}
+/* The [hidden] attribute is how the page toggles this on/off -- without this
+   override, the "display: block" above (equal specificity, but in an author
+   stylesheet vs. the browser's default [hidden]{display:none}) would win and
+   the element would stay visible even while hidden. Same fix below for
+   .link-generator__result, the only other class here that both sets its own
+   `display` and gets toggled via the hidden attribute. */
+.photo-preview[hidden] { display: none; }
+
+/* ---- Admin: login gate ---- */
+.admin-login-card { max-width: 380px; margin: 4rem auto; }
+
+/* ---- Admin: submissions dashboard ---- */
+.admin-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+.admin-logout-btn {
+    background: none;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 0.4rem 1rem;
+    font-size: 0.8rem;
+    cursor: pointer;
+    color: var(--ink-soft);
+}
+.admin-logout-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+.submission-card {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 1.25rem;
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-bottom: 1.25rem;
+}
+.submission-card__photo {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 8px;
+    background: var(--cream);
+}
+.submission-card__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+.submission-card__name { font-weight: 600; margin: 0; }
+.submission-card__meta {
+    font-size: 0.8rem;
+    color: var(--ink-soft);
+    margin: 0.15rem 0 0.6rem;
+}
+.submission-card__desc {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin: 0 0 0.85rem;
+    white-space: pre-wrap;
+}
+.status-pill {
+    font-size: 0.7rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 0.2rem 0.65rem;
+    border-radius: 999px;
+    white-space: nowrap;
+}
+.status-pill--new { background: #eef2fb; color: #2b4d8a; }
+.status-pill--reviewed { background: #eef6ee; color: #2b5a2b; }
+.status-pill--archived { background: var(--cream); color: var(--ink-soft); }
+
+.submission-card__actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.85rem;
+}
+.pill-btn {
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 0.3rem 0.85rem;
+    font-size: 0.78rem;
+    cursor: pointer;
+    color: var(--ink);
+}
+.pill-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+.link-generator {
+    border-top: 1px solid var(--line);
+    padding-top: 0.85rem;
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+.link-generator input[type="text"] {
+    padding: 0.4rem 0.6rem;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    font-size: 0.85rem;
+    width: 9rem;
+}
+.link-generator__result {
+    flex-basis: 100%;
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.6rem;
+}
+.link-generator__result[hidden] { display: none; } /* see .photo-preview[hidden] above */
+.link-generator__result input[type="text"] {
+    flex: 1;
+    width: auto;
+    font-size: 0.8rem;
+    color: var(--ink-soft);
+}
+
+/* ---- Private product reveal page (/shop/custom/) ---- */
+.code-entry { text-align: center; }
+.code-entry input[type="text"] {
+    text-align: center;
+    letter-spacing: 0.02em;
+}
+
+.custom-product {
+    text-align: center;
+}
+.custom-product__image {
+    width: 100%;
+    max-width: 360px;
+    aspect-ratio: 1 / 1;
+    object-fit: contain;
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    margin: 0 auto 1.25rem;
+    display: block;
+}
+.custom-product__name {
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-size: 1.5rem;
+    font-weight: 500;
+    margin: 0 0 0.4rem;
+}
+.custom-product__price {
+    font-size: 1.1rem;
+    color: var(--ink-soft);
+    margin: 0 0 1.25rem;
+}
