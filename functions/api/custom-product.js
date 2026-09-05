@@ -1,22 +1,30 @@
 // GET /api/custom-product?code=...
 // Powers the private product page at /shop/custom/ (see that page's inline
 // script). Verifies the signed code (see admin-generate-link.js /
-// _link-signing.js) and, if valid, fetches that one Printful product and
-// returns it in the same shape /api/products uses for each item in its
-// array -- so the private page can reuse the exact same rendering
-// (thumbnail, variants, price) as the public shop.
+// _link-signing.js) and, if valid, fetches the main Printful product plus
+// any "upsell" products Eve attached to the link, returning each in the same
+// shape /api/products uses for its items -- so the private page (and the
+// cart drawer's upsell offer, see shop/shop.js) can reuse the exact same
+// rendering (thumbnail, variants, price) as the public shop.
 //
 // Deliberately self-contained rather than importing the detail-fetch logic
 // from products.js: that file fans out over the whole catalog and has
 // hard-won handling for Printful's rate limits and Cloudflare's
-// per-invocation subrequest cap (see its comments) -- a single-product
-// lookup here never comes close to either limit, so duplicating the much
-// smaller amount of per-product shaping logic is safer than risking a
-// regression in the public listing by refactoring it into a shared module.
+// per-invocation subrequest cap (see its comments) -- a lookup of one main
+// product plus up to two upsells here never comes close to either limit, so
+// duplicating the much smaller amount of per-product shaping logic is safer
+// than risking a regression in the public listing by refactoring it into a
+// shared module.
 
 import { verifyToken } from "./_link-signing.js";
 
 const PRINTFUL_BASE = "https://api.printful.com";
+
+// Same convention as products.js -- see that file's comment. Stripped here
+// (server-side, for both the main product and any upsells) so nothing
+// downstream -- the reveal page, the cart drawer -- has to remember to do it
+// itself.
+const PRIVATE_PREFIX = "[Custom] ";
 
 function printfulHeaders(env) {
   const headers = { Authorization: `Bearer ${env.PRINTFUL_TOKEN}` };
@@ -42,21 +50,20 @@ function stripSourcingLine(description) {
     .trim();
 }
 
-export async function onRequestGet({ request, env }) {
-  const code = new URL(request.url).searchParams.get("code") || "";
-  const payload = await verifyToken(env.LINK_SIGNING_SECRET, code);
-  if (!payload || payload.purpose !== "custom-product" || !payload.productId) {
-    return jsonError(404, "This link isn't valid. Double-check the link or code and try again.");
-  }
+function displayName(name) {
+  return (name || "").replace(/^\[Custom\]\s*/, "");
+}
 
+// Fetches and shapes one Printful sync product. Returns null (never throws)
+// on any failure -- callers decide whether that's fatal (the main product)
+// or fine to just skip (an upsell).
+async function fetchShapedProduct(productId, env) {
   try {
-    const detailRes = await fetchWithRetry(`${PRINTFUL_BASE}/sync/products/${payload.productId}`, {
+    const detailRes = await fetchWithRetry(`${PRINTFUL_BASE}/sync/products/${productId}`, {
       headers: printfulHeaders(env),
     });
+    if (!detailRes.ok) return null;
     const detailData = await detailRes.json();
-    if (!detailRes.ok) {
-      return jsonError(404, "This product isn't available anymore.");
-    }
 
     const product = detailData.result.sync_product;
     const variants = (detailData.result.sync_variants || []).map((v) => {
@@ -75,9 +82,7 @@ export async function onRequestGet({ request, env }) {
       };
     });
 
-    if (variants.length === 0) {
-      return jsonError(404, "This product isn't available anymore.");
-    }
+    if (variants.length === 0) return null;
 
     const firstCatalogVariantId = (detailData.result.sync_variants || [])[0]?.variant_id || null;
     let description = null;
@@ -95,16 +100,41 @@ export async function onRequestGet({ request, env }) {
       }
     }
 
-    const shaped = {
+    return {
       id: product.id,
-      name: product.name,
+      name: displayName(product.name),
       thumbnail: variants[0]?.image || product.thumbnail_url || null,
       images: variants[0]?.images || [],
       description,
       variants,
     };
+  } catch {
+    return null;
+  }
+}
 
-    return new Response(JSON.stringify({ product: shaped }), {
+export async function onRequestGet({ request, env }) {
+  const code = new URL(request.url).searchParams.get("code") || "";
+  const payload = await verifyToken(env.LINK_SIGNING_SECRET, code);
+  if (!payload || payload.purpose !== "custom-product" || !payload.productId) {
+    return jsonError(404, "This link isn't valid. Double-check the link or code and try again.");
+  }
+
+  try {
+    const product = await fetchShapedProduct(payload.productId, env);
+    if (!product) {
+      return jsonError(404, "This product isn't available anymore.");
+    }
+
+    // Upsells are a nice-to-have, offered again in the cart before checkout
+    // (see shop/shop.js) -- if one has since been deleted/unsynced in
+    // Printful, just quietly drop it rather than failing the whole page the
+    // customer is waiting on.
+    const upsellIds = Array.isArray(payload.upsellProductIds) ? payload.upsellProductIds : [];
+    const upsellResults = await Promise.all(upsellIds.map((id) => fetchShapedProduct(id, env)));
+    const upsells = upsellResults.filter(Boolean);
+
+    return new Response(JSON.stringify({ product, upsells }), {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
