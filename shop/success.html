@@ -17,8 +17,11 @@
     <p><a href="/shop/index.html">&larr; Back to shop</a></p>
   </div>
   <script>
-    // Clear the cart now that payment has completed.
+    // Clear the cart now that payment has completed -- and any leftover
+    // custom-order upsell offer (see shop/shop.js), so a stale "add another
+    // as a gift" prompt for an already-purchased item never resurfaces.
     localStorage.removeItem("etp_cart_v1");
+    localStorage.removeItem("etp_custom_upsell_offer_v1");
   </script>
 </body>
 </html>

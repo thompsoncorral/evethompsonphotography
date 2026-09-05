@@ -8,6 +8,19 @@ let PRODUCTS = []; // cache of what /api/products returned
 let selectedRate = null;
 let activeFilter = "all";
 
+// ---------- custom-order upsell offer ----------
+// When a customer arrives via a private /shop/custom/ link and adds their
+// item to cart, that page stashes an "offer" here (main item + up to two
+// related products Eve attached to the link) so this cart drawer can present
+// it again, right before checkout: a checkbox to add one more of the main
+// item as a gift, plus the related products to add or skip. See
+// shop/custom/index.html for where this key gets written.
+const UPSELL_OFFER_KEY = "etp_custom_upsell_offer_v1";
+let upsellDismissed = false; // "No thanks, continue to checkout" for this page load
+let upsellGiftAdded = false; // whether the gift-copy checkbox is currently "on"
+let upsellAddedIds = new Set(); // upsell product ids already added to cart
+let upsellOfferSignature = null; // identifies which offer the state above belongs to
+
 // ---------- categorization ----------
 // The Printful sync API (see functions/api/products.js) doesn't return a
 // clean "product type" field, so we group products by matching keywords in
@@ -441,6 +454,121 @@ function initCarousels() {
   });
 }
 
+// ---------- custom-order upsell panel ----------
+
+function loadUpsellOffer() {
+  try {
+    return JSON.parse(localStorage.getItem(UPSELL_OFFER_KEY));
+  } catch {
+    return null;
+  }
+}
+
+function upsellProductTileHTML(product) {
+  const added = upsellAddedIds.has(product.id);
+  const hasChoices = product.variants.length > 1;
+  const options = product.variants
+    .map((v) => `<option value="${v.id}">${v.name} — ${money(parseFloat(v.retail_price))}</option>`)
+    .join("");
+  return `
+    <div class="upsell-product" data-product-id="${product.id}">
+      <img src="${product.thumbnail || ""}" alt="${product.name}" />
+      <div class="upsell-product-info">
+        <p class="upsell-product-name">${product.name}</p>
+        ${hasChoices ? `<select class="upsell-product-select">${options}</select>` : ""}
+        <p class="upsell-product-price">${money(parseFloat(product.variants[0].retail_price))}</p>
+        <button type="button" class="upsell-add-btn" ${added ? "disabled" : ""}>${added ? "Added ✓" : "Add to cart"}</button>
+      </div>
+    </div>
+  `;
+}
+
+function wireUpsellTile(product) {
+  const tile = document.querySelector(`.upsell-product[data-product-id="${product.id}"]`);
+  if (!tile) return;
+  const select = tile.querySelector(".upsell-product-select");
+  const priceEl = tile.querySelector(".upsell-product-price");
+  const btn = tile.querySelector(".upsell-add-btn");
+
+  function currentVariant() {
+    return select ? product.variants.find((v) => String(v.id) === select.value) : product.variants[0];
+  }
+
+  if (select) {
+    select.addEventListener("change", () => {
+      priceEl.textContent = money(parseFloat(currentVariant().retail_price));
+    });
+  }
+
+  btn.addEventListener("click", () => {
+    if (upsellAddedIds.has(product.id)) return;
+    // Mark it added *before* calling addToCart -- addToCart triggers its own
+    // saveCart()/renderCart(), so the re-render it causes already shows the
+    // "Added ✓" state instead of needing a second render call here.
+    upsellAddedIds.add(product.id);
+    addToCart(currentVariant(), product.name, 1);
+  });
+}
+
+// Renders (or hides) the "add a gift copy" + "you might also like" panel in
+// the cart drawer, based on whatever /shop/custom/ last stashed and whether
+// the customer has since dismissed it. Called at the end of every
+// renderCart() so it always reflects the current cart.
+function renderUpsellPanel(cart) {
+  const panel = document.getElementById("upsell-panel");
+  const offer = loadUpsellOffer();
+
+  if (!offer || !offer.upsells || offer.upsells.length === 0 || upsellDismissed) {
+    panel.hidden = true;
+    return;
+  }
+
+  // Only worth showing if the main item is still actually in the cart --
+  // e.g. the customer removed it with the cart's own remove button.
+  const mainLine = cart.find((l) => l.variant_id === offer.mainVariantId);
+  if (!mainLine) {
+    panel.hidden = true;
+    return;
+  }
+
+  // A different offer (a different custom item, or different upsells)
+  // resets the per-item "added"/gift state; the same offer re-rendering
+  // (e.g. a quantity tweak elsewhere in the cart) keeps it as-is.
+  const signature = `${offer.mainVariantId}:${offer.upsells.map((u) => u.id).join(",")}`;
+  if (signature !== upsellOfferSignature) {
+    upsellOfferSignature = signature;
+    upsellGiftAdded = false;
+    upsellAddedIds = new Set();
+  }
+
+  panel.hidden = false;
+  document.getElementById("gift-item-name").textContent = offer.mainName;
+  document.getElementById("gift-item-price").textContent = money(mainLine.price);
+  document.getElementById("gift-checkbox").checked = upsellGiftAdded;
+
+  document.getElementById("upsell-products").innerHTML = offer.upsells.map(upsellProductTileHTML).join("");
+  offer.upsells.forEach(wireUpsellTile);
+}
+
+// Toggling the gift checkbox just nudges the main item's quantity up or down
+// by one -- note this assumes nothing else changed that line's quantity
+// between checking and unchecking (an edge case not worth guarding against
+// for what's a lightweight cart nudge, not an order-integrity concern).
+function handleGiftCheckboxChange(e) {
+  const offer = loadUpsellOffer();
+  if (!offer) return;
+  const line = loadCart().find((l) => l.variant_id === offer.mainVariantId);
+  if (!line) return;
+
+  upsellGiftAdded = e.target.checked;
+  // Floor at 1 on uncheck -- this checkbox should only ever add/remove the
+  // extra "gift" unit, never the customer's original item itself, even if
+  // its quantity was independently changed via the cart's own +/- controls
+  // in between checking and unchecking.
+  const nextQty = e.target.checked ? line.quantity + 1 : Math.max(1, line.quantity - 1);
+  updateQuantity(offer.mainVariantId, nextQty);
+}
+
 function renderCart() {
   const cart = loadCart();
   const container = document.getElementById("cart-items");
@@ -456,6 +584,7 @@ function renderCart() {
     subtotalEl.textContent = money(0);
     shippingSection.hidden = true;
     checkoutBtn.disabled = true;
+    document.getElementById("upsell-panel").hidden = true;
     return;
   }
 
@@ -493,6 +622,8 @@ function renderCart() {
       updateQuantity(variantId, 0);
     });
   });
+
+  renderUpsellPanel(cart);
 
   shippingSection.hidden = false;
   // Any cart change invalidates a previously-picked shipping rate.
@@ -710,6 +841,11 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("cart-toggle").addEventListener("click", openCart);
   document.getElementById("cart-close").addEventListener("click", closeCart);
   document.getElementById("cart-overlay").addEventListener("click", closeCart);
+  document.getElementById("gift-checkbox").addEventListener("change", handleGiftCheckboxChange);
+  document.getElementById("upsell-dismiss-btn").addEventListener("click", () => {
+    upsellDismissed = true;
+    renderCart();
+  });
   document.getElementById("variant-modal-close").addEventListener("click", () => {
     document.getElementById("variant-modal").hidden = true;
   });

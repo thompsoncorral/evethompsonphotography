@@ -130,6 +130,20 @@
         <span id="cart-subtotal-amount">$0.00</span>
       </div>
 
+      <!-- Custom-order upsell offer: only shown when a customer just added
+           an item from their private /shop/custom/ link (see shop.js
+           renderUpsellPanel()). Lets them add one more of that item as a
+           gift, plus up to two related products, before checking out. -->
+      <section id="upsell-panel" class="upsell-panel" hidden>
+        <h3>Before you check out</h3>
+        <label class="upsell-gift-row">
+          <input type="checkbox" id="gift-checkbox" />
+          <span>Add one more of "<span id="gift-item-name"></span>" as a gift — <span id="gift-item-price"></span></span>
+        </label>
+        <div id="upsell-products" class="upsell-products"></div>
+        <button type="button" id="upsell-dismiss-btn" class="secondary-btn upsell-dismiss-btn">No thanks, continue to checkout</button>
+      </section>
+
       <section id="shipping-section" class="shipping-section" hidden>
         <h3>Shipping details</h3>
         <form id="shipping-form">

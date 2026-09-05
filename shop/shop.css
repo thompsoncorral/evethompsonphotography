@@ -353,6 +353,58 @@ body {
 
 .cart-subtotal { display: flex; justify-content: space-between; padding: 1rem 0; font-weight: 600; border-top: 1px solid var(--line); }
 
+/* Custom-order upsell offer (see shop.js renderUpsellPanel()) */
+.upsell-panel {
+    border-top: 1px solid var(--line);
+    padding-top: 1rem;
+    margin-bottom: 0.25rem;
+}
+.upsell-panel h3 { font-size: 0.95rem; margin: 0 0 0.75rem; }
+.upsell-gift-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    padding: 0.6rem 0.7rem;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    margin-bottom: 0.75rem;
+    cursor: pointer;
+}
+.upsell-gift-row input[type="checkbox"] { margin-top: 0.15rem; }
+.upsell-products { display: flex; flex-direction: column; gap: 0.6rem; margin-bottom: 0.85rem; }
+.upsell-product {
+    display: flex;
+    gap: 0.65rem;
+    align-items: center;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 0.6rem;
+}
+.upsell-product img { width: 52px; height: 52px; object-fit: cover; border-radius: 6px; background: var(--line); flex-shrink: 0; }
+.upsell-product-info { flex: 1; min-width: 0; }
+.upsell-product-name { margin: 0; font-size: 0.85rem; }
+.upsell-product-select {
+    width: 100%;
+    margin: 0.3rem 0;
+    padding: 0.3rem 0.4rem;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    font-size: 0.8rem;
+}
+.upsell-product-price { margin: 0 0 0.35rem; font-size: 0.8rem; opacity: 0.7; }
+.upsell-add-btn {
+    background: white;
+    border: 1px solid var(--ink);
+    color: var(--ink);
+    padding: 0.3rem 0.75rem;
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: 0.78rem;
+}
+.upsell-add-btn:disabled { opacity: 0.5; cursor: default; }
+.upsell-dismiss-btn { width: 100%; }
+
 .shipping-section h3 { font-size: 0.95rem; margin-bottom: 0.5rem; }
 .shipping-section form { display: flex; flex-direction: column; gap: 0.6rem; }
 .shipping-section label { font-size: 0.8rem; display: flex; flex-direction: column; gap: 0.25rem; }
@@ -744,6 +796,12 @@ body {
     border-radius: 6px;
     font-size: 0.85rem;
     width: 9rem;
+}
+.link-generator__hint {
+    flex-basis: 100%;
+    margin: 0;
+    font-size: 0.75rem;
+    opacity: 0.6;
 }
 .link-generator__result {
     flex-basis: 100%;
