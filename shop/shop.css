@@ -363,6 +363,8 @@ body {
 .modal-inner {
     background: white; border-radius: 12px; padding: 1.5rem;
     width: min(380px, 90%); position: relative; text-align: center;
+    max-height: 85vh; overflow-y: auto; overscroll-behavior: contain;
+    box-sizing: border-box;
 }
 .modal-close { position: absolute; top: 0.5rem; right: 0.75rem; background: none; border: none; font-size: 1.5rem; cursor: pointer; }
 .modal-inner img { width: 100%; aspect-ratio: 1/1; object-fit: contain; border-radius: 8px; margin-bottom: 0.75rem; background: white; }
