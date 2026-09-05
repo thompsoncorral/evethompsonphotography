@@ -76,6 +76,11 @@
     document.getElementById("year").textContent = new Date().getFullYear();
 
     const CART_KEY = "etp_cart_v1";
+    // Stashed here when the main item is added to cart so the shop's cart
+    // drawer (see shop/shop.js) can offer the same "add another as a gift" +
+    // upsell products flow, right before checkout, without this page and
+    // that one needing to talk to each other directly.
+    const UPSELL_OFFER_KEY = "etp_custom_upsell_offer_v1";
     function loadCart() {
       try {
         return JSON.parse(localStorage.getItem(CART_KEY)) || [];
@@ -128,14 +133,7 @@
     }
 
     let currentProduct = null;
-
-    // Products made for a custom order are named "[Custom] <name>" in
-    // Printful so /api/products can filter them out of the public shop (see
-    // that function) -- that prefix is purely an internal bookkeeping detail
-    // and shouldn't leak into anything the customer actually sees here.
-    function displayName(product) {
-      return product.name.replace(/^\[Custom\]\s*/, "");
-    }
+    let currentUpsells = [];
 
     function renderProduct(product) {
       currentProduct = product;
@@ -144,12 +142,12 @@
         .map((v) => `<option value="${v.id}">${v.name} — ${money(parseFloat(v.retail_price))}</option>`)
         .join("");
 
-      document.getElementById("product-name").textContent = displayName(product);
+      document.getElementById("product-name").textContent = product.name;
 
       function updateSelection() {
         const v = product.variants.find((v) => String(v.id) === select.value);
         document.getElementById("product-image").src = v.image || product.thumbnail || "";
-        document.getElementById("product-image").alt = displayName(product);
+        document.getElementById("product-image").alt = product.name;
         document.getElementById("product-price").textContent = money(parseFloat(v.retail_price));
       }
       select.onchange = updateSelection;
@@ -164,6 +162,7 @@
         const res = await fetch(`/api/custom-product?code=${encodeURIComponent(code)}`);
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "This link isn't valid.");
+        currentUpsells = data.upsells || [];
         renderProduct(data.product);
       } catch (err) {
         showCodeEntry(err.message);
@@ -189,7 +188,28 @@
       const select = document.getElementById("variant-select");
       const variant = currentProduct.variants.find((v) => String(v.id) === select.value);
       const qty = Math.max(1, Number(document.getElementById("quantity-input").value) || 1);
-      addToCart(variant, displayName(currentProduct), qty);
+      addToCart(variant, currentProduct.name, qty);
+
+      // If this order has upsells attached, hand them off to the shop's
+      // cart drawer so it can offer them again (plus a "one more as a gift"
+      // option for this exact item) right before checkout. Overwrites any
+      // previous offer -- only the most recently-added custom item's
+      // upsells make sense to keep showing.
+      if (currentUpsells.length > 0) {
+        try {
+          localStorage.setItem(
+            UPSELL_OFFER_KEY,
+            JSON.stringify({
+              mainVariantId: variant.id,
+              mainName: `${currentProduct.name} — ${variant.name}`,
+              upsells: currentUpsells,
+            })
+          );
+        } catch {
+          // best-effort -- worst case the cart just doesn't show the offer
+        }
+      }
+
       document.getElementById("added-message").hidden = false;
     });
 
