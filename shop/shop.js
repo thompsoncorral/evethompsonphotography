@@ -100,6 +100,15 @@ const HIDDEN_CATEGORIES = new Set([
   "apparel", // only one shirt so far -- hide until there's a fuller lineup
 ]);
 
+// Categories rendered as an endless horizontal carousel instead of the
+// normal wrapping grid -- scroll (or use the arrows) in either direction and
+// it loops forever rather than dead-ending. Implemented by rendering the
+// product list three times back to back and silently snapping the scroll
+// position back into the middle copy whenever it strays into copy 1 or copy
+// 3 (see initCarousels()), so from the shopper's point of view there's no
+// visible seam. To add another one, just add its category key here.
+const CAROUSEL_CATEGORIES = new Set(["luggage-tags"]);
+
 const CATEGORY_DISPLAY_ORDER = [
   "canvas",
   "mouse-pads",
@@ -336,13 +345,27 @@ function renderProducts() {
         : "";
       const beforeHTML = banner && banner.position !== "after" ? bannerImg : "";
       const afterHTML = banner && banner.position === "after" ? bannerImg : "";
+      const isCarousel = CAROUSEL_CATEGORIES.has(group.key);
+      // Carousel rows repeat the product list 3x (see CAROUSEL_CATEGORIES
+      // above) -- plain rows just render it once. Reusing productCardHTML
+      // means duplicated "Choose options"/image buttons still work exactly
+      // like the originals: they're wired up by data-product-id below, not
+      // by any assumption that each card is unique in the DOM.
+      const cardSets = isCarousel ? [group.products, group.products, group.products] : [group.products];
+      const cardsHTML = cardSets.map((set) => set.map(productCardHTML).join("")).join("");
+      const rowHTML = `<div class="product-row${isCarousel ? " product-row--carousel" : ""}">${cardsHTML}</div>`;
+      const bodyHTML = isCarousel
+        ? `<div class="carousel-wrap">
+            ${rowHTML}
+            <button type="button" class="carousel-arrow carousel-arrow--prev" aria-label="Scroll left">&#8249;</button>
+            <button type="button" class="carousel-arrow carousel-arrow--next" aria-label="Scroll right">&#8250;</button>
+          </div>`
+        : rowHTML;
       return `
       ${beforeHTML}
       <section class="product-row-section" data-category="${group.key}">
         <h2 class="product-row-heading">${group.label}</h2>
-        <div class="product-row">
-          ${group.products.map(productCardHTML).join("")}
-        </div>
+        ${bodyHTML}
       </section>
       ${afterHTML}`;
     })
@@ -360,6 +383,61 @@ function renderProducts() {
       const images = product && product.images && product.images.length ? product.images : [img.src];
       openLightbox(images, 0, img.alt);
     });
+  });
+
+  initCarousels();
+}
+
+// ---------- infinite carousels ----------
+// See CAROUSEL_CATEGORIES above for why the row has 3 copies of the product
+// list. The trick: keep the visible scroll position parked in the middle
+// copy, and whenever the shopper scrolls (or clicks an arrow) far enough to
+// stray into copy 1 or copy 3, silently jump the scroll position by exactly
+// one copy-width in the opposite direction -- since copy 1, 2, and 3 are
+// pixel-identical, that jump is invisible and the row just appears to keep
+// going forever in either direction.
+function initCarousels() {
+  document.querySelectorAll(".carousel-wrap").forEach((wrap) => {
+    const row = wrap.querySelector(".product-row--carousel");
+    if (!row) return;
+
+    const oneCopyWidth = () => row.scrollWidth / 3;
+
+    const centerScroll = () => {
+      row.scrollLeft = oneCopyWidth();
+    };
+    centerScroll();
+    // Thumbnails loading in can change the row's width after first paint --
+    // re-center once everything (including images) has finished loading so
+    // the starting position stays accurate.
+    window.addEventListener("load", centerScroll, { once: true });
+
+    let ticking = false;
+    row.addEventListener("scroll", () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        const third = oneCopyWidth();
+        if (row.scrollLeft < third * 0.15) {
+          row.scrollLeft += third;
+        } else if (row.scrollLeft > third * 1.85) {
+          row.scrollLeft -= third;
+        }
+        ticking = false;
+      });
+    });
+
+    function cardStep() {
+      const card = row.querySelector(".product-card");
+      if (!card) return row.clientWidth;
+      const gap = parseFloat(getComputedStyle(row).columnGap || getComputedStyle(row).gap || "0") || 0;
+      return card.getBoundingClientRect().width + gap;
+    }
+
+    const prevBtn = wrap.querySelector(".carousel-arrow--prev");
+    const nextBtn = wrap.querySelector(".carousel-arrow--next");
+    if (prevBtn) prevBtn.addEventListener("click", () => row.scrollBy({ left: -cardStep(), behavior: "smooth" }));
+    if (nextBtn) nextBtn.addEventListener("click", () => row.scrollBy({ left: cardStep(), behavior: "smooth" }));
   });
 }
 

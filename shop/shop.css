@@ -203,6 +203,54 @@ body {
     gap: 2rem;
 }
 
+/* Endless carousel rows -- see CAROUSEL_CATEGORIES in shop.js. The row
+   itself is a native horizontally-scrolling flexbox (so trackpad swipes and
+   touch drags work for free); cards get a fixed width instead of the grid's
+   flexible column so 3 back-to-back copies of the product list line up
+   identically -- that's what makes the loop invisible. */
+.carousel-wrap {
+    position: relative;
+}
+.product-row--carousel {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    padding-bottom: 0.25rem;
+}
+.product-row--carousel .product-card {
+    flex: 0 0 260px;
+    scroll-snap-align: start;
+}
+.carousel-arrow {
+    position: absolute;
+    top: 42%;
+    transform: translateY(-50%);
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    background: rgba(255, 255, 255, 0.92);
+    color: var(--ink);
+    font-size: 1.4rem;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+.carousel-arrow:hover { background: white; border-color: var(--accent); color: var(--accent); }
+.carousel-arrow--prev { left: -0.75rem; }
+.carousel-arrow--next { right: -0.75rem; }
+@media (max-width: 640px) {
+    /* Swiping is the natural interaction on touch screens -- the overlaid
+       arrows just crowd the cards on narrow viewports. */
+    .carousel-arrow { display: none; }
+}
+
 .product-card {
     background: white;
     border: 1px solid var(--line);
