@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <script>
+    if (location.hostname === "evethompsonphotography.com" || location.hostname === "www.evethompsonphotography.com") {
+      location.replace("https://shop.evethompsonphotography.com" + location.pathname + location.search + location.hash);
+    }
+  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Custom Order — Eve Thompson Photography</title>
+  <meta name="robots" content="noindex" />
+  <link rel="canonical" href="https://shop.evethompsonphotography.com/shop/custom-order/" />
+  <link rel="icon" href="../../assets/images/favicon.png" type="image/png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../shop.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar__brand">Eve Thompson Photography</div>
+    <nav class="topbar__nav">
+      <a href="https://evethompsonphotography.com/" class="topbar__navlink">Home</a>
+      <a href="https://evethompsonphotography.com/public-gallery.html" class="topbar__navlink">Public Gallery</a>
+      <a href="https://evethompsonphotography.com/book.html" class="topbar__navlink">Book a Session</a>
+      <a href="../index.html" class="topbar__navlink">Shop</a>
+    </nav>
+  </header>
+
+  <main class="narrow-page">
+    <h1 class="narrow-page__title">Send Your Photo, Get It Made</h1>
+    <p class="narrow-page__intro">
+      Have a photo you'd love turned into a canvas, a mug, a mouse pad — whatever you have in mind?
+      Send it over and tell me what you're picturing. I'll take a look and, once it's ready,
+      reach out with a private link so you can see it and order.
+    </p>
+
+    <div class="page-card">
+      <form id="custom-order-form" novalidate>
+        <label class="form-field">
+          <span>Your name</span>
+          <input type="text" name="name" required />
+        </label>
+
+        <label class="form-field">
+          <span>Your email</span>
+          <input type="email" name="email" required />
+          <span class="form-hint">This is how I'll reach you once your item is ready.</span>
+        </label>
+
+        <label class="form-field">
+          <span>What would you like made?</span>
+          <textarea name="description" required placeholder="e.g. A 16x20 canvas of this photo, or a mug — whatever you're picturing"></textarea>
+        </label>
+
+        <label class="form-field">
+          <span>Your photo</span>
+          <input type="file" name="photo" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" required />
+          <span class="form-hint">JPEG, PNG, WEBP, or HEIC — up to 15MB.</span>
+          <img id="photo-preview" class="photo-preview" hidden alt="Preview of your selected photo" />
+        </label>
+
+        <label class="form-checkbox">
+          <input type="checkbox" name="rightsConfirmed" required />
+          <span>I confirm that I own the rights to this photo, or have permission from whoever does, to use it for a custom product.</span>
+        </label>
+
+        <button type="submit" id="submit-btn" class="form-submit-btn">Send it over</button>
+      </form>
+
+      <div id="form-message" class="form-message" hidden></div>
+    </div>
+  </main>
+
+  <footer class="home-footer">
+    <nav class="home-footer__nav">
+      <a href="https://evethompsonphotography.com/">Home</a>
+      <a href="https://evethompsonphotography.com/public-gallery.html">Public Gallery</a>
+      <a href="https://evethompsonphotography.com/book.html">Book a Session</a>
+      <a href="../index.html">Shop</a>
+    </nav>
+    <p class="home-footer__copyright">All content Copyright &copy; <span id="year"></span> Eve Thompson Photography</p>
+  </footer>
+
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+
+    const form = document.getElementById("custom-order-form");
+    const submitBtn = document.getElementById("submit-btn");
+    const messageEl = document.getElementById("form-message");
+    const photoInput = form.querySelector('input[name="photo"]');
+    const photoPreview = document.getElementById("photo-preview");
+
+    const MAX_BYTES = 15 * 1024 * 1024;
+
+    photoInput.addEventListener("change", () => {
+      const file = photoInput.files[0];
+      if (!file) {
+        photoPreview.hidden = true;
+        return;
+      }
+      if (file.size > MAX_BYTES) {
+        showMessage("error", "That photo is a bit too large (15MB max) — a smaller export or a screenshot-quality copy works fine.");
+        photoInput.value = "";
+        photoPreview.hidden = true;
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        photoPreview.src = reader.result;
+        photoPreview.hidden = false;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    function showMessage(kind, text) {
+      messageEl.hidden = false;
+      messageEl.className = `form-message form-message--${kind}`;
+      messageEl.textContent = text;
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      messageEl.hidden = true;
+
+      const checkbox = form.querySelector('input[name="rightsConfirmed"]');
+      if (!checkbox.checked) {
+        showMessage("error", "Please confirm you own the rights to this photo (or have permission to use it) before sending.");
+        return;
+      }
+      if (!photoInput.files[0]) {
+        showMessage("error", "Please attach a photo.");
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Sending…";
+
+      try {
+        const formData = new FormData();
+        formData.set("name", form.name.value.trim());
+        formData.set("email", form.email.value.trim());
+        formData.set("description", form.description.value.trim());
+        formData.set("rightsConfirmed", checkbox.checked ? "true" : "false");
+        formData.set("photo", photoInput.files[0]);
+
+        const res = await fetch("/api/custom-order", { method: "POST", body: formData });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Something went wrong -- please try again.");
+
+        form.hidden = true;
+        showMessage("success", "Got it! Your photo is on its way to me. I'll review it and reach out at the email you gave once your item is ready.");
+      } catch (err) {
+        showMessage("error", err.message);
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Send it over";
+      }
+    });
+  </script>
+</body>
+</html>
