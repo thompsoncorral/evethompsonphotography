@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <script>
+    if (location.hostname === "evethompsonphotography.com" || location.hostname === "www.evethompsonphotography.com") {
+      location.replace("https://shop.evethompsonphotography.com" + location.pathname + location.search + location.hash);
+    }
+  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Your Custom Item — Eve Thompson Photography</title>
+  <meta name="robots" content="noindex" />
+  <link rel="icon" href="../../assets/images/favicon.png" type="image/png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../shop.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar__brand">Eve Thompson Photography</div>
+    <nav class="topbar__nav">
+      <a href="https://evethompsonphotography.com/" class="topbar__navlink">Home</a>
+      <a href="../index.html" class="topbar__navlink">Shop</a>
+    </nav>
+  </header>
+
+  <main class="narrow-page">
+    <h1 class="narrow-page__title">Your Custom Item</h1>
+
+    <!-- Manual code entry -->
+    <div id="code-entry-view" class="page-card code-entry" hidden>
+      <p class="narrow-page__intro" style="margin-top:0;">Enter the code from your email to view your item.</p>
+      <label class="form-field">
+        <span>Your code</span>
+        <input type="text" id="code-input" placeholder="Paste your code here" />
+      </label>
+      <button type="button" id="code-submit-btn" class="form-submit-btn">View my item</button>
+      <div id="code-message" class="form-message" hidden></div>
+    </div>
+
+    <!-- Loading -->
+    <div id="loading-view" class="page-card" hidden>
+      <p class="narrow-page__intro" style="margin:0;">Loading your item…</p>
+    </div>
+
+    <!-- Product reveal -->
+    <div id="product-view" class="page-card custom-product" hidden>
+      <img id="product-image" class="custom-product__image" src="" alt="" />
+      <h2 id="product-name" class="custom-product__name"></h2>
+      <label class="form-field" style="text-align:left;">
+        <span>Options</span>
+        <select id="variant-select"></select>
+      </label>
+      <label class="form-field" style="text-align:left;">
+        <span>Quantity</span>
+        <input type="number" id="quantity-input" value="1" min="1" style="width:100%; padding:0.65rem 0.8rem; border:1px solid var(--line); border-radius:8px; box-sizing:border-box;" />
+      </label>
+      <p id="product-price" class="custom-product__price"></p>
+      <button type="button" id="add-to-cart-btn" class="form-submit-btn">Add to cart</button>
+      <div id="added-message" class="form-message form-message--success" hidden>
+        Added to your cart! <a href="../index.html">Go to the shop to check out</a>.
+      </div>
+    </div>
+  </main>
+
+  <footer class="home-footer">
+    <nav class="home-footer__nav">
+      <a href="https://evethompsonphotography.com/">Home</a>
+      <a href="../index.html">Shop</a>
+    </nav>
+    <p class="home-footer__copyright">All content Copyright &copy; <span id="year"></span> Eve Thompson Photography</p>
+  </footer>
+
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+
+    const CART_KEY = "etp_cart_v1";
+    function loadCart() {
+      try {
+        return JSON.parse(localStorage.getItem(CART_KEY)) || [];
+      } catch {
+        return [];
+      }
+    }
+    function saveCart(cart) {
+      localStorage.setItem(CART_KEY, JSON.stringify(cart));
+    }
+    function addToCart(variant, productName, quantity) {
+      const cart = loadCart();
+      const existing = cart.find((line) => line.variant_id === variant.id);
+      if (existing) {
+        existing.quantity += quantity;
+      } else {
+        cart.push({
+          variant_id: variant.id,
+          name: `${productName} — ${variant.name}`,
+          price: parseFloat(variant.retail_price),
+          image: variant.image,
+          quantity,
+        });
+      }
+      saveCart(cart);
+    }
+    function money(n) {
+      return `$${n.toFixed(2)}`;
+    }
+
+    const codeEntryView = document.getElementById("code-entry-view");
+    const loadingView = document.getElementById("loading-view");
+    const productView = document.getElementById("product-view");
+    const codeInput = document.getElementById("code-input");
+    const codeMessage = document.getElementById("code-message");
+
+    function showOnly(view) {
+      [codeEntryView, loadingView, productView].forEach((v) => (v.hidden = v !== view));
+    }
+
+    function showCodeEntry(errorText) {
+      showOnly(codeEntryView);
+      if (errorText) {
+        codeMessage.hidden = false;
+        codeMessage.className = "form-message form-message--error";
+        codeMessage.textContent = errorText;
+      } else {
+        codeMessage.hidden = true;
+      }
+    }
+
+    let currentProduct = null;
+
+    // Products made for a custom order are named "[Custom] <name>" in
+    // Printful so /api/products can filter them out of the public shop (see
+    // that function) -- that prefix is purely an internal bookkeeping detail
+    // and shouldn't leak into anything the customer actually sees here.
+    function displayName(product) {
+      return product.name.replace(/^\[Custom\]\s*/, "");
+    }
+
+    function renderProduct(product) {
+      currentProduct = product;
+      const select = document.getElementById("variant-select");
+      select.innerHTML = product.variants
+        .map((v) => `<option value="${v.id}">${v.name} — ${money(parseFloat(v.retail_price))}</option>`)
+        .join("");
+
+      document.getElementById("product-name").textContent = displayName(product);
+
+      function updateSelection() {
+        const v = product.variants.find((v) => String(v.id) === select.value);
+        document.getElementById("product-image").src = v.image || product.thumbnail || "";
+        document.getElementById("product-image").alt = displayName(product);
+        document.getElementById("product-price").textContent = money(parseFloat(v.retail_price));
+      }
+      select.onchange = updateSelection;
+      updateSelection();
+
+      showOnly(productView);
+    }
+
+    async function loadByCode(code) {
+      showOnly(loadingView);
+      try {
+        const res = await fetch(`/api/custom-product?code=${encodeURIComponent(code)}`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "This link isn't valid.");
+        renderProduct(data.product);
+      } catch (err) {
+        showCodeEntry(err.message);
+      }
+    }
+
+    document.getElementById("code-submit-btn").addEventListener("click", () => {
+      const code = codeInput.value.trim();
+      if (!code) {
+        showCodeEntry("Please enter your code.");
+        return;
+      }
+      const url = new URL(window.location.href);
+      url.searchParams.set("code", code);
+      window.history.replaceState(null, "", url);
+      loadByCode(code);
+    });
+    codeInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") document.getElementById("code-submit-btn").click();
+    });
+
+    document.getElementById("add-to-cart-btn").addEventListener("click", () => {
+      const select = document.getElementById("variant-select");
+      const variant = currentProduct.variants.find((v) => String(v.id) === select.value);
+      const qty = Math.max(1, Number(document.getElementById("quantity-input").value) || 1);
+      addToCart(variant, displayName(currentProduct), qty);
+      document.getElementById("added-message").hidden = false;
+    });
+
+    const initialCode = new URLSearchParams(window.location.search).get("code");
+    if (initialCode) {
+      codeInput.value = initialCode;
+      loadByCode(initialCode);
+    } else {
+      showCodeEntry();
+    }
+  </script>
+</body>
+</html>
