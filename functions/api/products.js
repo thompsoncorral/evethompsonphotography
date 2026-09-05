@@ -6,6 +6,15 @@
 
 const PRINTFUL_BASE = "https://api.printful.com";
 
+// A one-off custom order (see /shop/custom-order/) gets built in Printful
+// like any other product, but should never show up in the public shop --
+// it's only ever reached through its own private signed link (see
+// /shop/custom/ and admin-generate-link.js). The convention: prefix that
+// product's name with this in the Printful dashboard and it's filtered out
+// of this endpoint entirely below (not just hidden client-side -- it never
+// leaves this function). Remove the prefix later to publish it normally.
+const PRIVATE_PREFIX = "[Custom] ";
+
 function printfulHeaders(env) {
   const headers = {
     Authorization: `Bearer ${env.PRINTFUL_TOKEN}`,
@@ -189,7 +198,7 @@ export async function onRequestGet({ env, request, waitUntil }) {
       })
     );
 
-    const products = detailed.filter((p) => p && p.variants.length > 0);
+    const products = detailed.filter((p) => p && p.variants.length > 0 && !p.name.startsWith(PRIVATE_PREFIX));
 
     const response = new Response(JSON.stringify({ products }), {
       headers: { "Content-Type": "application/json", "Cache-Control": "public, max-age=600" },
