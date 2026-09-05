@@ -63,7 +63,12 @@
 
         <label class="form-checkbox">
           <input type="checkbox" name="rightsConfirmed" required />
-          <span>I confirm that I own the rights to this photo, or have permission from whoever does, to use it for a custom product.</span>
+          <span>I own this photo, or have permission from whoever does, to use it for a custom product — and if that isn't true, I agree to be fully responsible for any claim, cost, or damages that result.</span>
+        </label>
+
+        <label class="form-checkbox">
+          <input type="checkbox" name="publicityConfirmed" required />
+          <span>If this photo shows anyone other than me, I have their permission (a parent or guardian's, if they're a minor) for their image to be used this way — and I'm responsible if that turns out not to be true.</span>
         </label>
 
         <button type="submit" id="submit-btn" class="form-submit-btn">Send it over</button>
@@ -124,9 +129,14 @@
       e.preventDefault();
       messageEl.hidden = true;
 
-      const checkbox = form.querySelector('input[name="rightsConfirmed"]');
-      if (!checkbox.checked) {
+      const rightsCheckbox = form.querySelector('input[name="rightsConfirmed"]');
+      const publicityCheckbox = form.querySelector('input[name="publicityConfirmed"]');
+      if (!rightsCheckbox.checked) {
         showMessage("error", "Please confirm you own the rights to this photo (or have permission to use it) before sending.");
+        return;
+      }
+      if (!publicityCheckbox.checked) {
+        showMessage("error", "Please confirm you have permission to use anyone else's image shown in the photo before sending.");
         return;
       }
       if (!photoInput.files[0]) {
@@ -142,7 +152,8 @@
         formData.set("name", form.name.value.trim());
         formData.set("email", form.email.value.trim());
         formData.set("description", form.description.value.trim());
-        formData.set("rightsConfirmed", checkbox.checked ? "true" : "false");
+        formData.set("rightsConfirmed", rightsCheckbox.checked ? "true" : "false");
+        formData.set("publicityConfirmed", publicityCheckbox.checked ? "true" : "false");
         formData.set("photo", photoInput.files[0]);
 
         const res = await fetch("/api/custom-order", { method: "POST", body: formData });
