@@ -100,7 +100,10 @@
               ${s.status !== "new" ? `<button class="pill-btn" data-action="new">Mark new</button>` : ""}
             </div>
             <div class="link-generator">
-              <input type="text" class="product-id-input" placeholder="Printful product ID" />
+              <input type="text" class="product-id-input" placeholder="Printful product ID (the main item)" />
+              <input type="text" class="upsell-id-input" placeholder="Upsell product ID (optional)" />
+              <input type="text" class="upsell-id-input" placeholder="Upsell product ID (optional)" />
+              <p class="link-generator__hint">Upsells are offered again in the customer's cart, right before checkout.</p>
               <button class="pill-btn generate-link-btn" type="button">Generate private link</button>
               <div class="link-generator__result" hidden>
                 <input type="text" class="link-result" readonly />
@@ -161,6 +164,7 @@
 
         const generateBtn = card.querySelector(".generate-link-btn");
         const productIdInput = card.querySelector(".product-id-input");
+        const upsellIdInputs = card.querySelectorAll(".upsell-id-input");
         const resultWrap = card.querySelector(".link-generator__result");
         const resultInput = card.querySelector(".link-result");
         const copyBtn = card.querySelector(".copy-link-btn");
@@ -171,13 +175,16 @@
             alert("Enter the Printful product ID first.");
             return;
           }
+          const upsellProductIds = Array.from(upsellIdInputs)
+            .map((input) => input.value.trim())
+            .filter(Boolean);
           generateBtn.disabled = true;
           generateBtn.textContent = "Generating…";
           try {
             const res = await fetch("/api/admin-generate-link", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ productId }),
+              body: JSON.stringify({ productId, upsellProductIds }),
             });
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || "Couldn't generate a link.");
