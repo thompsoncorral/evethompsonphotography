@@ -3,3 +3,4 @@ Disallow: /gallery.html
 Disallow: /collections.html
 
 Sitemap: https://evethompsonphotography.com/sitemap.xml
+Sitemap: https://shop.evethompsonphotography.com/shop/sitemap-products.xml
