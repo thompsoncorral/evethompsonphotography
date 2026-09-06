@@ -108,6 +108,13 @@ body {
    border-radius: 8px;
 }
 
+@media (min-width: 641px) {
+    .custom-order-banner-img {
+       max-width: 700px;
+    }
+}
+   
+
 /* Clickable banner inviting shoppers to submit their own photo for a custom
    item (see shop/custom-order/). Sits between the title and the product
    grid so it reads as an option alongside the catalog, not an interruption.
