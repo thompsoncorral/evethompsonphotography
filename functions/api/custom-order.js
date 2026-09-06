@@ -1,5 +1,9 @@
 // POST /api/custom-order  (multipart/form-data: name, email, description,
-// rightsConfirmed, publicityConfirmed, photo)
+// rightsConfirmed, indemnificationConfirmed, fulfillmentAuthorized,
+// qualityAcknowledged, imageApproved, promotionalConsent, photo)
+// The first five consent fields are required (see the "-- Required"
+// sections on shop/custom-order/); promotionalConsent is the one optional
+// checkbox and is stored as given either way.
 // Handles a submission from /shop/custom-order/ -- a customer's own photo
 // plus what they'd like it made into. Nothing here is public or automatic:
 // the photo goes into private R2 storage and the details into KV, both only
@@ -27,7 +31,11 @@ export async function onRequestPost({ request, env }) {
   const email = (form.get("email") || "").toString().trim();
   const description = (form.get("description") || "").toString().trim();
   const rightsConfirmed = form.get("rightsConfirmed") === "true";
-  const publicityConfirmed = form.get("publicityConfirmed") === "true";
+  const indemnificationConfirmed = form.get("indemnificationConfirmed") === "true";
+  const fulfillmentAuthorized = form.get("fulfillmentAuthorized") === "true";
+  const qualityAcknowledged = form.get("qualityAcknowledged") === "true";
+  const imageApproved = form.get("imageApproved") === "true";
+  const promotionalConsent = form.get("promotionalConsent") === "true";
   const photo = form.get("photo");
 
   if (!name || !email || !description) {
@@ -37,10 +45,19 @@ export async function onRequestPost({ request, env }) {
     return jsonError(400, "That email address doesn't look right.");
   }
   if (!rightsConfirmed) {
-    return jsonError(400, "Please confirm you own the rights to this photo (or have permission to use it) before submitting.");
+    return jsonError(400, "Please confirm the Photo Ownership & Permission statement before submitting.");
   }
-  if (!publicityConfirmed) {
-    return jsonError(400, "Please confirm you have permission to use anyone else's image shown in the photo before submitting.");
+  if (!indemnificationConfirmed) {
+    return jsonError(400, "Please confirm the Third-Party Rights & Indemnification statement before submitting.");
+  }
+  if (!fulfillmentAuthorized) {
+    return jsonError(400, "Please confirm the Production & Fulfillment Permission statement before submitting.");
+  }
+  if (!qualityAcknowledged) {
+    return jsonError(400, "Please confirm the Image Quality & Product Appearance statement before submitting.");
+  }
+  if (!imageApproved) {
+    return jsonError(400, "Please confirm the Customer Image Approval statement before submitting.");
   }
   if (!photo || typeof photo === "string") {
     return jsonError(400, "Please attach a photo.");
@@ -67,7 +84,11 @@ export async function onRequestPost({ request, env }) {
       email,
       description,
       rightsConfirmed: true,
-      publicityConfirmed: true,
+      indemnificationConfirmed: true,
+      fulfillmentAuthorized: true,
+      qualityAcknowledged: true,
+      imageApproved: true,
+      promotionalConsent,
       submittedAt: new Date().toISOString(),
       photoKey,
       photoContentType: photo.type || "application/octet-stream",
