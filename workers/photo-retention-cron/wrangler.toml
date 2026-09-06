@@ -1,0 +1,23 @@
+name = "custom-order-photo-retention"
+main = "index.js"
+compatibility_date = "2026-08-31"
+
+# Runs daily -- deletes any /shop/custom-order/ submission (photo in R2 +
+# record in KV) that's more than 30 days old. See index.js for details.
+# This is a separate Worker from the evethompsonphotography Pages project
+# so it can run on its own clock; the Pages project also does the same
+# cleanup opportunistically (functions/api/_retention.js) whenever a new
+# order comes in or the admin page loads.
+[triggers]
+crons = ["0 9 * * *"]
+
+# Same KV namespace and R2 bucket the Pages project (evethompsonphotography)
+# is bound to -- find the exact IDs under that project's Settings > Bindings,
+# or under Storage & databases in the Cloudflare dashboard.
+[[kv_namespaces]]
+binding = "CUSTOM_ORDERS"
+id = "REPLACE_WITH_custom_orders_NAMESPACE_ID"
+
+[[r2_buckets]]
+binding = "CUSTOM_PHOTOS"
+bucket_name = "custom-order-photos"
