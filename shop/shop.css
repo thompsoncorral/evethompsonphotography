@@ -712,9 +712,42 @@ body {
     font-size: 0.85rem;
     line-height: 1.5;
     color: var(--ink-soft);
-    margin-bottom: 1.5rem;
+    margin-bottom: 0;
 }
 .form-checkbox input { margin-top: 0.2rem; flex-shrink: 0; }
+
+/* Sectioned consent copy on the custom-order intake form (see
+   shop/custom-order/). Each required consent gets its own small-caps
+   heading + statement, separated by a hairline; the optional promo consent
+   and the two informational notices (no checkbox) reuse the same block. */
+.consent-block {
+    padding-top: 1.25rem;
+    margin-top: 1.25rem;
+    border-top: 1px solid var(--line);
+}
+.consent-block:first-of-type {
+    padding-top: 0;
+    margin-top: 0;
+    border-top: none;
+}
+.consent-block__heading {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 0.5rem;
+}
+.consent-block__text {
+    font-size: 0.85rem;
+    line-height: 1.6;
+    color: var(--ink-soft);
+    margin: 0;
+}
+.consent-block--intro .consent-block__heading,
+.consent-block--note .consent-block__heading {
+    color: var(--ink);
+}
 
 .form-submit-btn {
     background: var(--ink);
