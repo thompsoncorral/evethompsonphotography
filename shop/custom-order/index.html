@@ -1,243 +1,248 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <script>
-    if (location.hostname === "evethompsonphotography.com" || location.hostname === "www.evethompsonphotography.com") {
-      location.replace("https://shop.evethompsonphotography.com" + location.pathname + location.search + location.hash);
-    }
-  </script>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Custom Order — Eve Thompson Photography</title>
-  <meta name="robots" content="noindex" />
-  <link rel="canonical" href="https://shop.evethompsonphotography.com/shop/custom-order/" />
-  <link rel="icon" href="../../assets/images/favicon.png" type="image/png" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../shop.css" />
+<meta charset="UTF-8" />
+<script>
+if (location.hostname === "evethompsonphotography.com" || location.hostname === "www.evethompsonphotography.com") {
+location.replace("https://shop.evethompsonphotography.com" + location.pathname + location.search + location.hash);
+}
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Custom Order — Eve Thompson Photography</title>
+<meta name="robots" content="noindex" />
+<link rel="canonical" href="https://shop.evethompsonphotography.com/shop/custom-order/" />
+<link rel="icon" href="../../assets/images/favicon.png" type="image/png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../shop.css" />
 </head>
 <body>
-  <header class="topbar">
-    <div class="topbar__brand">Eve Thompson Photography</div>
-    <nav class="topbar__nav">
-      <a href="https://evethompsonphotography.com/" class="topbar__navlink">Home</a>
-      <a href="https://evethompsonphotography.com/public-gallery.html" class="topbar__navlink">Public Gallery</a>
-      <a href="https://evethompsonphotography.com/book.html" class="topbar__navlink">Book a Session</a>
-      <a href="../index.html" class="topbar__navlink">Shop</a>
-    </nav>
-  </header>
+<header class="topbar">
+<div class="topbar__brand">Eve Thompson Photography</div>
+<nav class="topbar__nav">
+<a href="https://evethompsonphotography.com/" class="topbar__navlink">Home</a>
+<a href="https://evethompsonphotography.com/public-gallery.html" class="topbar__navlink">Public Gallery</a>
+<a href="https://evethompsonphotography.com/book.html" class="topbar__navlink">Book a Session</a>
+<a href="../index.html" class="topbar__navlink">Shop</a>
+</nav>
+</header>
 
-  <main class="narrow-page">
-    <h1 class="narrow-page__title">Send Your Photo, Get It Made</h1>
-    <p class="narrow-page__intro">
-      Have a photo you'd love turned into a canvas, a mug, a mouse pad — whatever you have in mind?
-      Send it over and tell me what you're picturing. I'll take a look and, once it's ready,
-      reach out with a private link so you can see it and order.
-    </p>
+<main class="narrow-page">
+<h1 class="narrow-page__title">Send Your Photo, Get It Made</h1>
+<p class="narrow-page__intro">
+Have a photo you'd love turned into a canvas, a mug, a mouse pad — whatever you have in mind?
+Send it over and tell me what you're picturing. I'll take a look and, once it's ready,
+reach out with a private link so you can see it and order.
+</p>
 
-    <div class="page-card">
-      <form id="custom-order-form" novalidate>
-        <label class="form-field">
-          <span>Your name</span>
-          <input type="text" name="name" required />
-        </label>
+<div class="page-card">
+<form id="custom-order-form" novalidate>
+<label class="form-field">
+<span>Your name</span>
+<input type="text" name="name" required />
+</label>
 
-        <label class="form-field">
-          <span>Your email</span>
-          <input type="email" name="email" required />
-          <span class="form-hint">This is how I'll reach you once your item is ready.</span>
-        </label>
+<label class="form-field">
+<span>Your email</span>
+<input type="email" name="email" required />
+<span class="form-hint">This is how I'll reach you once your item is ready.</span>
+</label>
 
-        <label class="form-field">
-          <span>What would you like made?</span>
-          <textarea name="description" required placeholder="e.g. A 16x20 canvas of this photo, or a mug — whatever you're picturing"></textarea>
-        </label>
+<label class="form-field">
+<span>What would you like made?</span>
+<textarea name="description" required placeholder="e.g. A 16x20 canvas of this photo, or a mug — whatever you're picturing"></textarea>
+</label>
 
-        <label class="form-field">
-          <span>Your photo</span>
-          <input type="file" name="photo" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" required />
-          <span class="form-hint">JPEG, PNG, WEBP, or HEIC — up to 15MB.</span>
-          <img id="photo-preview" class="photo-preview" hidden alt="Preview of your selected photo" />
-        </label>
+<label class="form-field">
+<span>Your photo</span>
+<input type="file" name="photo" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" required />
+<span class="form-hint">JPEG, PNG, WEBP, or HEIC — up to 15MB.</span>
+<img id="photo-preview" class="photo-preview" hidden alt="Preview of your selected photo" />
+</label>
 
-        <div class="consent-block consent-block--intro">
-          <p class="consent-block__heading">Before You Submit Your Photo</p>
-          <p class="consent-block__text">Please make sure you have the right to use the image. If someone else took the photograph, you must have their permission to have it reproduced. If other people appear in the photograph, make sure you have any permissions that may be required for your intended use. By submitting your photo, you confirm that you have the necessary rights and permissions to use the image for your custom product.</p>
-        </div>
+<div class="consent-block consent-block--note">
+<p class="consent-block__heading">Photo Retention</p>
+<p class="consent-block__text">All photos will be deleted after 30 days from the date of submission.</p>
+</div>
 
-        <div class="consent-block">
-          <p class="consent-block__heading">Photo Ownership &amp; Permission — Required</p>
-          <label class="form-checkbox">
-            <input type="checkbox" name="rightsConfirmed" required />
-            <span>I confirm that I own the copyright to the photo I am submitting or have obtained the necessary written permission or license from the copyright owner to reproduce and use it for this custom product. I also confirm that I have obtained any permissions that may be required for people depicted in the photograph, including a parent or legal guardian when applicable.</span>
-          </label>
-        </div>
+<div class="consent-block consent-block--intro">
+<p class="consent-block__heading">Before You Submit Your Photo</p>
+<p class="consent-block__text">Please make sure you have the right to use the image. If someone else took the photograph, you must have their permission to have it reproduced. If other people appear in the photograph, make sure you have any permissions that may be required for your intended use. By submitting your photo, you confirm that you have the necessary rights and permissions to use the image for your custom product.</p>
+</div>
 
-        <div class="consent-block">
-          <p class="consent-block__heading">Third-Party Rights &amp; Indemnification — Required</p>
-          <label class="form-checkbox">
-            <input type="checkbox" name="indemnificationConfirmed" required />
-            <span>I represent and warrant that I have all rights, permissions, licenses, and consents necessary to submit and use the photo and its contents for the custom product I am ordering. I understand that I am responsible for ensuring that the submitted content does not infringe or violate any copyright, trademark, privacy, publicity, or other rights of any person or entity. I agree to be responsible for any claims, damages, losses, liabilities, costs, and expenses, including reasonable attorneys' fees, arising from or related to my unauthorized submission or use of the photo or its contents. To the extent permitted by applicable law, I agree to indemnify, defend, and hold harmless Eve Thompson Photography, its owners, employees, contractors, service providers, production partners, and fulfillment providers from and against such claims, damages, losses, liabilities, costs, and expenses.</span>
-          </label>
-        </div>
+<div class="consent-block">
+<p class="consent-block__heading">Photo Ownership &amp; Permission — Required</p>
+<label class="form-checkbox">
+<input type="checkbox" name="rightsConfirmed" required />
+<span>I confirm that I own the copyright to the photo I am submitting or have obtained the necessary written permission or license from the copyright owner to reproduce and use it for this custom product. I also confirm that I have obtained any permissions that may be required for people depicted in the photograph, including a parent or legal guardian when applicable.</span>
+</label>
+</div>
 
-        <div class="consent-block">
-          <p class="consent-block__heading">Production &amp; Fulfillment Permission — Required</p>
-          <label class="form-checkbox">
-            <input type="checkbox" name="fulfillmentAuthorized" required />
-            <span>I authorize Eve Thompson Photography and its authorized production and fulfillment partners to reproduce, process, transmit, store, and use the submitted photo as reasonably necessary to create, produce, fulfill, ship, and provide customer service for my order. This permission does not authorize promotional or advertising use of my photograph unless I separately agree to such use.</span>
-          </label>
-        </div>
+<div class="consent-block">
+<p class="consent-block__heading">Third-Party Rights &amp; Indemnification — Required</p>
+<label class="form-checkbox">
+<input type="checkbox" name="indemnificationConfirmed" required />
+<span>I represent and warrant that I have all rights, permissions, licenses, and consents necessary to submit and use the photo and its contents for the custom product I am ordering. I understand that I am responsible for ensuring that the submitted content does not infringe or violate any copyright, trademark, privacy, publicity, or other rights of any person or entity. I agree to be responsible for any claims, damages, losses, liabilities, costs, and expenses, including reasonable attorneys' fees, arising from or related to my unauthorized submission or use of the photo or its contents. To the extent permitted by applicable law, I agree to indemnify, defend, and hold harmless Eve Thompson Photography, its owners, employees, contractors, service providers, production partners, and fulfillment providers from and against such claims, damages, losses, liabilities, costs, and expenses.</span>
+</label>
+</div>
 
-        <div class="consent-block">
-          <p class="consent-block__heading">Image Quality &amp; Product Appearance — Required</p>
-          <label class="form-checkbox">
-            <input type="checkbox" name="qualityAcknowledged" required />
-            <span>I understand that I am responsible for the image I submit, including its quality, resolution, cropping, orientation, and appearance on the finished product. I understand that colors, cropping, image placement, and overall appearance may vary slightly between my digital image and the finished physical product due to differences in screens, printing processes, materials, and product specifications.</span>
-          </label>
-        </div>
+<div class="consent-block">
+<p class="consent-block__heading">Production &amp; Fulfillment Permission — Required</p>
+<label class="form-checkbox">
+<input type="checkbox" name="fulfillmentAuthorized" required />
+<span>I authorize Eve Thompson Photography and its authorized production and fulfillment partners to reproduce, process, transmit, store, and use the submitted photo as reasonably necessary to create, produce, fulfill, ship, and provide customer service for my order. This permission does not authorize promotional or advertising use of my photograph unless I separately agree to such use.</span>
+</label>
+</div>
 
-        <div class="consent-block">
-          <p class="consent-block__heading">Customer Image Approval — Required</p>
-          <label class="form-checkbox">
-            <input type="checkbox" name="imageApproved" required />
-            <span>I have reviewed the photo I am submitting and authorize Eve Thompson Photography to use this exact image for my custom order. I understand that changes to the submitted image may not be possible after my order has entered production.</span>
-          </label>
-        </div>
+<div class="consent-block">
+<p class="consent-block__heading">Image Quality &amp; Product Appearance — Required</p>
+<label class="form-checkbox">
+<input type="checkbox" name="qualityAcknowledged" required />
+<span>I understand that I am responsible for the image I submit, including its quality, resolution, cropping, orientation, and appearance on the finished product. I understand that colors, cropping, image placement, and overall appearance may vary slightly between my digital image and the finished physical product due to differences in screens, printing processes, materials, and product specifications.</span>
+</label>
+</div>
 
-        <div class="consent-block consent-block--note">
-          <p class="consent-block__heading">Right to Refuse an Order</p>
-          <p class="consent-block__text">Eve Thompson Photography reserves the right to refuse or cancel an order containing content that we reasonably believe violates applicable law, intellectual property rights, privacy or publicity rights, or the policies of our production and fulfillment partners.</p>
-        </div>
+<div class="consent-block">
+<p class="consent-block__heading">Customer Image Approval — Required</p>
+<label class="form-checkbox">
+<input type="checkbox" name="imageApproved" required />
+<span>I have reviewed the photo I am submitting and authorize Eve Thompson Photography to use this exact image for my custom order. I understand that changes to the submitted image may not be possible after my order has entered production.</span>
+</label>
+</div>
 
-        <div class="consent-block consent-block--optional">
-          <p class="consent-block__heading">Optional — Permission to Use Photo for Promotion</p>
-          <label class="form-checkbox">
-            <input type="checkbox" name="promotionalConsent" />
-            <span>I give Eve Thompson Photography permission to display my submitted photograph and/or finished custom product on its website, social media, portfolio, advertising, or other promotional materials. I understand that this permission is voluntary and is not required to purchase a custom product.</span>
-          </label>
-        </div>
+<div class="consent-block consent-block--note">
+<p class="consent-block__heading">Right to Refuse an Order</p>
+<p class="consent-block__text">Eve Thompson Photography reserves the right to refuse or cancel an order containing content that we reasonably believe violates applicable law, intellectual property rights, privacy or publicity rights, or the policies of our production and fulfillment partners.</p>
+</div>
 
-        <button type="submit" id="submit-btn" class="form-submit-btn">Send it over</button>
-      </form>
+<div class="consent-block consent-block--optional">
+<p class="consent-block__heading">Optional — Permission to Use Photo for Promotion</p>
+<label class="form-checkbox">
+<input type="checkbox" name="promotionalConsent" />
+<span>I give Eve Thompson Photography permission to display my submitted photograph and/or finished custom product on its website, social media, portfolio, advertising, or other promotional materials. I understand that this permission is voluntary and is not required to purchase a custom product.</span>
+</label>
+</div>
 
-      <div id="form-message" class="form-message" hidden></div>
-    </div>
-  </main>
+<button type="submit" id="submit-btn" class="form-submit-btn">Send it over</button>
+</form>
 
-  <footer class="home-footer">
-    <nav class="home-footer__nav">
-      <a href="https://evethompsonphotography.com/">Home</a>
-      <a href="https://evethompsonphotography.com/public-gallery.html">Public Gallery</a>
-      <a href="https://evethompsonphotography.com/book.html">Book a Session</a>
-      <a href="../index.html">Shop</a>
-    </nav>
-    <p class="home-footer__copyright">All content Copyright &copy; <span id="year"></span> Eve Thompson Photography</p>
-  </footer>
+<div id="form-message" class="form-message" hidden></div>
+</div>
+</main>
 
-  <script>
-    document.getElementById("year").textContent = new Date().getFullYear();
+<footer class="home-footer">
+<nav class="home-footer__nav">
+<a href="https://evethompsonphotography.com/">Home</a>
+<a href="https://evethompsonphotography.com/public-gallery.html">Public Gallery</a>
+<a href="https://evethompsonphotography.com/book.html">Book a Session</a>
+<a href="../index.html">Shop</a>
+</nav>
+<p class="home-footer__copyright">All content Copyright &copy; <span id="year"></span> Eve Thompson Photography</p>
+</footer>
 
-    const form = document.getElementById("custom-order-form");
-    const submitBtn = document.getElementById("submit-btn");
-    const messageEl = document.getElementById("form-message");
-    const photoInput = form.querySelector('input[name="photo"]');
-    const photoPreview = document.getElementById("photo-preview");
+<script>
+document.getElementById("year").textContent = new Date().getFullYear();
 
-    const MAX_BYTES = 15 * 1024 * 1024;
+const form = document.getElementById("custom-order-form");
+const submitBtn = document.getElementById("submit-btn");
+const messageEl = document.getElementById("form-message");
+const photoInput = form.querySelector('input[name="photo"]');
+const photoPreview = document.getElementById("photo-preview");
 
-    // The five required consent checkboxes -- see the "-- Required" sections
-    // above. promotionalConsent (below) is deliberately not in this list;
-    // it's the one optional checkbox on the form.
-    const REQUIRED_CHECKBOXES = [
-      { name: "rightsConfirmed", message: "Please confirm the Photo Ownership & Permission statement before sending." },
-      { name: "indemnificationConfirmed", message: "Please confirm the Third-Party Rights & Indemnification statement before sending." },
-      { name: "fulfillmentAuthorized", message: "Please confirm the Production & Fulfillment Permission statement before sending." },
-      { name: "qualityAcknowledged", message: "Please confirm the Image Quality & Product Appearance statement before sending." },
-      { name: "imageApproved", message: "Please confirm the Customer Image Approval statement before sending." },
-    ];
+const MAX_BYTES = 15 * 1024 * 1024;
 
-    // Clear a "please confirm ..." error as soon as the customer checks a
-    // required box, instead of leaving it on screen until they hit submit
-    // again -- the message no longer reflects the form's current state.
-    REQUIRED_CHECKBOXES.forEach(({ name }) => {
-      const checkbox = form.querySelector(`input[name="${name}"]`);
-      checkbox.addEventListener("change", () => {
-        if (checkbox.checked && !messageEl.hidden && messageEl.classList.contains("form-message--error")) {
-          messageEl.hidden = true;
-        }
-      });
-    });
+// The five required consent checkboxes -- see the "-- Required" sections
+// above. promotionalConsent (below) is deliberately not in this list;
+// it's the one optional checkbox on the form.
+const REQUIRED_CHECKBOXES = [
+{ name: "rightsConfirmed", message: "Please confirm the Photo Ownership & Permission statement before sending." },
+{ name: "indemnificationConfirmed", message: "Please confirm the Third-Party Rights & Indemnification statement before sending." },
+{ name: "fulfillmentAuthorized", message: "Please confirm the Production & Fulfillment Permission statement before sending." },
+{ name: "qualityAcknowledged", message: "Please confirm the Image Quality & Product Appearance statement before sending." },
+{ name: "imageApproved", message: "Please confirm the Customer Image Approval statement before sending." },
+];
 
-    photoInput.addEventListener("change", () => {
-      const file = photoInput.files[0];
-      if (!file) {
-        photoPreview.hidden = true;
-        return;
-      }
-      if (file.size > MAX_BYTES) {
-        showMessage("error", "That photo is a bit too large (15MB max) — a smaller export or a screenshot-quality copy works fine.");
-        photoInput.value = "";
-        photoPreview.hidden = true;
-        return;
-      }
-      const reader = new FileReader();
-      reader.onload = () => {
-        photoPreview.src = reader.result;
-        photoPreview.hidden = false;
-      };
-      reader.readAsDataURL(file);
-    });
+// Clear a "please confirm ..." error as soon as the customer checks a
+// required box, instead of leaving it on screen until they hit submit
+// again -- the message no longer reflects the form's current state.
+REQUIRED_CHECKBOXES.forEach(({ name }) => {
+const checkbox = form.querySelector(`input[name="${name}"]`);
+checkbox.addEventListener("change", () => {
+if (checkbox.checked && !messageEl.hidden && messageEl.classList.contains("form-message--error")) {
+messageEl.hidden = true;
+}
+});
+});
 
-    function showMessage(kind, text) {
-      messageEl.hidden = false;
-      messageEl.className = `form-message form-message--${kind}`;
-      messageEl.textContent = text;
-    }
+photoInput.addEventListener("change", () => {
+const file = photoInput.files[0];
+if (!file) {
+photoPreview.hidden = true;
+return;
+}
+if (file.size > MAX_BYTES) {
+showMessage("error", "That photo is a bit too large (15MB max) — a smaller export or a screenshot-quality copy works fine.");
+photoInput.value = "";
+photoPreview.hidden = true;
+return;
+}
+const reader = new FileReader();
+reader.onload = () => {
+photoPreview.src = reader.result;
+photoPreview.hidden = false;
+};
+reader.readAsDataURL(file);
+});
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      messageEl.hidden = true;
+function showMessage(kind, text) {
+messageEl.hidden = false;
+messageEl.className = `form-message form-message--${kind}`;
+messageEl.textContent = text;
+}
 
-      for (const { name, message } of REQUIRED_CHECKBOXES) {
-        const cb = form.querySelector(`input[name="${name}"]`);
-        if (!cb.checked) {
-          showMessage("error", message);
-          return;
-        }
-      }
-      if (!photoInput.files[0]) {
-        showMessage("error", "Please attach a photo.");
-        return;
-      }
+form.addEventListener("submit", async (e) => {
+e.preventDefault();
+messageEl.hidden = true;
 
-      submitBtn.disabled = true;
-      submitBtn.textContent = "Sending…";
+for (const { name, message } of REQUIRED_CHECKBOXES) {
+const cb = form.querySelector(`input[name="${name}"]`);
+if (!cb.checked) {
+showMessage("error", message);
+return;
+}
+}
+if (!photoInput.files[0]) {
+showMessage("error", "Please attach a photo.");
+return;
+}
 
-      try {
-        const formData = new FormData();
-        formData.set("name", form.name.value.trim());
-        formData.set("email", form.email.value.trim());
-        formData.set("description", form.description.value.trim());
-        REQUIRED_CHECKBOXES.forEach(({ name }) => {
-          formData.set(name, form.querySelector(`input[name="${name}"]`).checked ? "true" : "false");
-        });
-        formData.set("promotionalConsent", form.querySelector('input[name="promotionalConsent"]').checked ? "true" : "false");
-        formData.set("photo", photoInput.files[0]);
+submitBtn.disabled = true;
+submitBtn.textContent = "Sending…";
 
-        const res = await fetch("/api/custom-order", { method: "POST", body: formData });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Something went wrong -- please try again.");
+try {
+const formData = new FormData();
+formData.set("name", form.name.value.trim());
+formData.set("email", form.email.value.trim());
+formData.set("description", form.description.value.trim());
+REQUIRED_CHECKBOXES.forEach(({ name }) => {
+formData.set(name, form.querySelector(`input[name="${name}"]`).checked ? "true" : "false");
+});
+formData.set("promotionalConsent", form.querySelector('input[name="promotionalConsent"]').checked ? "true" : "false");
+formData.set("photo", photoInput.files[0]);
 
-        form.hidden = true;
-        showMessage("success", "Got it! Your photo is on its way to me. I'll review it and reach out at the email you gave once your item is ready.");
-      } catch (err) {
-        showMessage("error", err.message);
-        submitBtn.disabled = false;
-        submitBtn.textContent = "Send it over";
-      }
-    });
-  </script>
+const res = await fetch("/api/custom-order", { method: "POST", body: formData });
+const data = await res.json();
+if (!res.ok) throw new Error(data.error || "Something went wrong -- please try again.");
+
+form.hidden = true;
+showMessage("success", "Got it! Your photo is on its way to me. I'll review it and reach out at the email you gave once your item is ready.");
+} catch (err) {
+showMessage("error", err.message);
+submitBtn.disabled = false;
+submitBtn.textContent = "Send it over";
+}
+});
+</script>
 </body>
 </html>
