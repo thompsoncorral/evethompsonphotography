@@ -760,6 +760,7 @@ body {
 }
 
 .form-submit-btn {
+   margin-top: 1.5rem;
     background: var(--ink);
     color: white;
     border: none;
