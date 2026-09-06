@@ -224,6 +224,16 @@ function money(n) {
   return `$${n.toFixed(2)}`;
 }
 
+// Builds the readable "id-slug" path segment used by the per-product SEO
+// landing pages (see functions/shop/p/[id].js) -- kept in sync with that
+// file's own copy of this logic since both need to agree on the URL.
+function productSlug(name) {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
 function productCardHTML(product) {
   const prices = product.variants.map((v) => parseFloat(v.retail_price));
   const cheapest = Math.min(...prices);
@@ -246,7 +256,7 @@ function productCardHTML(product) {
         <img src="${product.thumbnail || ""}" alt="${product.name}" loading="lazy" class="product-image" data-product-id="${product.id}" />
         ${badge}
       </div>
-      <h3>${product.name}</h3>
+      <h3><a href="/shop/p/${product.id}-${productSlug(product.name)}/" class="product-card__name-link">${product.name}</a></h3>
       <p class="product-price">${priceLabel}</p>
       <button class="secondary-btn choose-btn" data-product-id="${product.id}">Choose options</button>
     </article>
@@ -842,6 +852,15 @@ async function loadProducts() {
     if (!res.ok) throw new Error(data.error || "Could not load products");
     PRODUCTS = data.products || [];
     renderProducts();
+
+    // Deep-link support: a shopper arriving from one of the per-product SEO
+    // landing pages (see functions/shop/p/[id].js) via /shop/?product=<id>
+    // gets that product's variant-picker modal opened right away, instead
+    // of landing on the unfiltered grid and having to re-find the item.
+    const requestedProductId = new URLSearchParams(window.location.search).get("product");
+    if (requestedProductId && PRODUCTS.some((p) => String(p.id) === requestedProductId)) {
+      openVariantModal(requestedProductId);
+    }
   } catch (err) {
     document.getElementById("load-error").hidden = false;
     document.getElementById("load-error").textContent =
