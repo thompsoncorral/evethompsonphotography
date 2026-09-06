@@ -67,6 +67,9 @@ const CATEGORY_LABELS = {
 //     stays in the dropdown like normal.
 // `position` controls whether the banner renders above ("before", the
 // default) or below ("after") the category's product section.
+// `href` is optional -- when set, the banner image is wrapped in a link
+// (e.g. pointing shoppers at the custom-order photo submission page)
+// instead of being a plain, non-clickable image.
 // To add another one: drop the banner image in shop/banners/, add an entry
 // below, and (if pinned) give its category key a spot near the end of
 // CATEGORY_DISPLAY_ORDER.
@@ -86,6 +89,15 @@ const STORY_BANNERS = {
     src: "banners/mouse-pads-banner.png",
     alt: "Every day items turned into art.",
     position: "after",
+  },
+  "phone-cases": {
+    // Clickable divider between Phone Cases and Pillows inviting shoppers
+    // to submit their own photo for a made-to-order item instead of
+    // picking from the catalog -- see shop/custom-order/.
+    src: "banners/customize-banner.png",
+    alt: "Customize your own product -- click here",
+    position: "after",
+    href: "custom-order/",
   },
 };
 
@@ -353,9 +365,13 @@ function renderProducts() {
   grid.innerHTML = groups
     .map((group) => {
       const banner = STORY_BANNERS[group.key];
-      const bannerImg = banner
+      const bannerImgTag = banner
         ? `<img src="${banner.src}" alt="${banner.alt}" class="story-banner" data-category="${group.key}" loading="lazy" />`
         : "";
+      // A banner with an `href` (see STORY_BANNERS above) becomes a clickable
+      // link wrapping the image, instead of a plain non-interactive image.
+      const bannerImg =
+        banner && banner.href ? `<a href="${banner.href}" class="story-banner-link">${bannerImgTag}</a>` : bannerImgTag;
       const beforeHTML = banner && banner.position !== "after" ? bannerImg : "";
       const afterHTML = banner && banner.position === "after" ? bannerImg : "";
       const isCarousel = CAROUSEL_CATEGORIES.has(group.key);
