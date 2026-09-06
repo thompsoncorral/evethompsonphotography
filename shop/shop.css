@@ -84,22 +84,28 @@ body {
     line-height: 1.7;
 }
 
-/* Full-width image banner (bottom of the shop page) linking to the same
-   custom-order intake page as .custom-order-banner above -- a bigger visual
-   call-out placed after the catalog, for shoppers who scroll all the way
-   through without noticing the text prompt near the top. */
+/* Image banner (bottom of the shop page) linking to the same custom-order
+   intake page as .custom-order-banner above -- a bigger visual call-out
+   placed after the catalog, for shoppers who scroll all the way through
+   without noticing the text prompt near the top. Constrained to the same
+   max-width/gutters as .product-grid and .story-banner so it lines up with
+   the product cards and other banners instead of running edge-to-edge. */
 .custom-order-banner-img {
-    display: block;
-    line-height: 0;
-    transition: opacity 0.15s ease;
+   display: block;
+   line-height: 0;
+   transition: opacity 0.15s ease;
+   max-width: 1400px;
+   margin: 2rem auto;
+   padding: 0 2rem;
 }
 .custom-order-banner-img:hover {
-    opacity: 0.92;
+   opacity: 0.92;
 }
 .custom-order-banner-img img {
-    display: block;
-    width: 100%;
-    height: auto;
+   display: block;
+   width: 100%;
+   height: auto;
+   border-radius: 8px;
 }
 
 /* Clickable banner inviting shoppers to submit their own photo for a custom
