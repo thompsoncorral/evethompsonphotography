@@ -242,6 +242,16 @@ body {
     border-radius: 8px;
     margin: 3rem 0 1.5rem;
 }
+/* Wraps a story banner that has an `href` (see STORY_BANNERS in shop.js),
+   e.g. the Phone Cases -> Pillows divider inviting a custom photo order.
+   Same hover treatment as .custom-order-banner-img below. */
+.story-banner-link {
+    display: block;
+    transition: opacity 0.15s ease;
+}
+.story-banner-link:hover {
+    opacity: 0.92;
+}
 .product-row-heading {
     /* Hidden per request -- the category name (e.g. "Canvas Prints") no
        longer shows above each product row. To bring headings back later,
