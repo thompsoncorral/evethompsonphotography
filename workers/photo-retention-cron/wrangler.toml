@@ -21,3 +21,8 @@ id = "REPLACE_WITH_custom_orders_NAMESPACE_ID"
 [[r2_buckets]]
 binding = "CUSTOM_PHOTOS"
 bucket_name = "custom-order-photos"
+
+# RETENTION_RUN_SECRET gates the manual ?run=1 testing endpoint in index.js.
+# Set it as a secret (not a plaintext var) -- via the dashboard under this
+# Worker's Settings > Variables and secrets, or with:
+#   wrangler secret put RETENTION_RUN_SECRET
