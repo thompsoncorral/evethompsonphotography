@@ -158,6 +158,18 @@
       { name: "imageApproved", message: "Please confirm the Customer Image Approval statement before sending." },
     ];
 
+    // Clear a "please confirm ..." error as soon as the customer checks a
+    // required box, instead of leaving it on screen until they hit submit
+    // again -- the message no longer reflects the form's current state.
+    REQUIRED_CHECKBOXES.forEach(({ name }) => {
+      const checkbox = form.querySelector(`input[name="${name}"]`);
+      checkbox.addEventListener("change", () => {
+        if (checkbox.checked && !messageEl.hidden && messageEl.classList.contains("form-message--error")) {
+          messageEl.hidden = true;
+        }
+      });
+    });
+
     photoInput.addEventListener("change", () => {
       const file = photoInput.files[0];
       if (!file) {
