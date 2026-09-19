@@ -746,7 +746,11 @@ function openVariantModal(productId) {
   const detailsEl = document.getElementById("variant-details");
   const detailsBody = document.getElementById("variant-details-body");
   if (product.description) {
-    detailsBody.innerHTML = product.description;
+    // Plain text, not markup: Printful sends the description as text with real
+    // line breaks, so textContent is correct here -- innerHTML would parse any
+    // angle bracket in the copy as HTML, and set as one blob the line breaks
+    // were lost anyway. #variant-details-body is white-space: pre-line.
+    detailsBody.textContent = product.description;
     detailsEl.hidden = false;
     detailsEl.open = false;
   } else {
