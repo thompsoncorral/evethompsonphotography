@@ -37,6 +37,7 @@ let upsellOfferSignature = null; // identifies which offer the state above belon
 // Anything that matches no rule falls into "Other" so new catalog items
 // never disappear, they just show up uncategorized until a rule is added.
 const CATEGORY_LABELS = {
+  ornaments: "Acrylic Ornaments",
   canvas: "Canvas Prints",
   "playing-cards": "Playing Cards",
   pillows: "Pillows",
@@ -74,6 +75,28 @@ const CATEGORY_LABELS = {
 // below, and (if pinned) give its category key a spot near the end of
 // CATEGORY_DISPLAY_ORDER.
 const STORY_BANNERS = {
+  // A category may carry ONE banner object or an ARRAY of them, so a section can
+  // be framed above AND below. The ornaments do both: the Holiday banner names
+  // the season, and the divider closes the row so the canvases read as a
+  // separate part of the shop. Seasonal - delete this entry (and the two images)
+  // when the holidays are done; the row still works without either.
+  ornaments: [
+    {
+      // Names the row: the per-row headings are hidden in shop.css on purpose.
+      src: "banners/holiday-ornaments-banner.png",
+      // Kept in step with the wording on the banner image itself: "two shapes",
+      // not four. The product description says four, but that is Printful's
+      // template copy and only Circle and Rectangle are actually offered.
+      alt: "Holiday Ornaments - acrylic, two shapes, ready to hang",
+      position: "before",
+    },
+    {
+      src: "banners/ornaments-divider.png",
+      alt: "",
+      position: "after",
+      thin: true,     // a rule between sections, so it gets tighter spacing
+    },
+  ],
   backpacks: {
     src: "banners/backpacks-banner.png",
     alt: "Some moments are meant to be witnessed. Others are meant to be remembered.",
@@ -102,6 +125,10 @@ const STORY_BANNERS = {
 };
 
 const CATEGORY_MATCH_ORDER = [
+  // First, and deliberately so: the ornaments are named just "Acrylic
+  // ornament", and a broad rule further down could otherwise claim the word.
+  // Narrow-to-broad is the rule this list already follows.
+  { key: "ornaments", test: /ornament/i },
   { key: "playing-cards", test: /playing cards?/i },
   { key: "pillows", test: /pillow|cushion/i },
   { key: "mugs", test: /\bmug\b/i },
@@ -135,6 +162,9 @@ const HIDDEN_CATEGORIES = new Set([
 const CAROUSEL_CATEGORIES = new Set(["luggage-tags", "mouse-pads", "playing-cards"]);
 
 const CATEGORY_DISPLAY_ORDER = [
+  // Seasonal and at the top on purpose - move this line down, or delete it, to
+  // put the ornaments back among the rest once the season is over.
+  "ornaments",
   "canvas",
   "mouse-pads",
   "luggage-tags",
@@ -351,14 +381,34 @@ function applyFilter() {
   // banner) hides and shows right along with its section.
   document.querySelectorAll(".product-row-section, .story-banner").forEach((el) => {
     const category = el.dataset.category;
-    // Pinned story categories (see STORY_BANNERS) are always visible
-    // regardless of which filter is active.
-    if (STORY_BANNERS[category]?.pinned) {
+    // Pinned story categories (see STORY_BANNERS) are always visible regardless
+    // of which filter is active. A category may hold a list of banners now, so
+    // it counts as pinned if ANY of them is.
+    const entry = STORY_BANNERS[category];
+    const isPinned = Array.isArray(entry) ? entry.some((b) => b.pinned) : entry?.pinned;
+    if (isPinned) {
       el.hidden = false;
       return;
     }
     el.hidden = activeFilter !== "all" && category !== activeFilter;
   });
+}
+
+// A category's entry in STORY_BANNERS is one banner object, or an array of them
+// when a section needs framing on both sides. Everything else keeps working
+// unchanged because a single object just becomes a list of one.
+function bannerList(key) {
+  const entry = STORY_BANNERS[key];
+  if (!entry) return [];
+  return Array.isArray(entry) ? entry : [entry];
+}
+
+function bannerHTML(banner, key) {
+  const img = `<img src="${banner.src}" alt="${banner.alt || ""}" class="story-banner${
+    banner.thin ? " story-banner--thin" : ""}" data-category="${key}" loading="lazy" />`;
+  // A banner with an `href` (see STORY_BANNERS above) becomes a clickable link
+  // wrapping the image, instead of a plain non-interactive image.
+  return banner.href ? `<a href="${banner.href}" class="story-banner-link">${img}</a>` : img;
 }
 
 function renderProducts() {
@@ -374,16 +424,12 @@ function renderProducts() {
 
   grid.innerHTML = groups
     .map((group) => {
-      const banner = STORY_BANNERS[group.key];
-      const bannerImgTag = banner
-        ? `<img src="${banner.src}" alt="${banner.alt}" class="story-banner" data-category="${group.key}" loading="lazy" />`
-        : "";
-      // A banner with an `href` (see STORY_BANNERS above) becomes a clickable
-      // link wrapping the image, instead of a plain non-interactive image.
-      const bannerImg =
-        banner && banner.href ? `<a href="${banner.href}" class="story-banner-link">${bannerImgTag}</a>` : bannerImgTag;
-      const beforeHTML = banner && banner.position !== "after" ? bannerImg : "";
-      const afterHTML = banner && banner.position === "after" ? bannerImg : "";
+      // A category's banner entry may be a single object or an array of them (see
+      // STORY_BANNERS above), so it is normalised to a list here and each one is
+      // placed by its own `position`.
+      const banners = bannerList(group.key);
+      const beforeHTML = banners.filter((b) => b.position !== "after").map((b) => bannerHTML(b, group.key)).join("");
+      const afterHTML = banners.filter((b) => b.position === "after").map((b) => bannerHTML(b, group.key)).join("");
       const isCarousel = CAROUSEL_CATEGORIES.has(group.key);
       // Carousel rows repeat the product list 3x (see CAROUSEL_CATEGORIES
       // above) -- plain rows just render it once. Reusing productCardHTML

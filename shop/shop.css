@@ -244,6 +244,18 @@ body {
 .product-row-section { margin-bottom: 2.5rem; }
 .product-row-section:last-child { margin-bottom: 0; }
 
+/* A banner used as a RULE between sections rather than a feature above one --
+   see the `thin` flag in STORY_BANNERS. The default 3rem above is right for a
+   banner introducing a row; a divider should sit close under the row it closes
+   and leave its space BELOW, where the next section begins. */
+/* Two classes, not one: this rule sits ABOVE .story-banner in the file and both
+   are single-class selectors, so with equal specificity the later one wins and
+   the divider silently kept the default 3rem/1.5rem margins. Chaining the class
+   makes the order irrelevant. */
+.story-banner.story-banner--thin {
+    margin: 0.5rem 0 2.5rem;
+}
+
 /* Story banners -- see STORY_BANNERS in shop.js. Contained within the
    product grid's own width (not edge-to-edge), shown at the image's natural
    proportions so nothing gets cropped. */
@@ -287,6 +299,17 @@ body {
        room (still collapses to a single column on mobile, same as before). */
     grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
     gap: 2rem;
+}
+
+/* The Acrylic Ornaments row -- four matching shapes, so they belong on ONE
+   row where they can be compared side by side. The 360px rule above is
+   deliberately roomy for the rest of the catalog (see its comment) and pushes
+   the fourth ornament onto a second row, so this section alone drops to 250px,
+   which lands all four across at a typical laptop width. Scoped to this
+   category so no other row changes, and it still collapses to fewer columns on
+   a narrow window for the same reason the rest of the grid does. */
+.product-row-section[data-category="ornaments"] .product-row {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
 }
 
 /* Endless carousel rows -- see CAROUSEL_CATEGORIES in shop.js. The row
