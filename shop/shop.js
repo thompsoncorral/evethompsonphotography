@@ -824,7 +824,15 @@ async function handleShippingSubmit(e) {
       }),
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "Could not fetch shipping rates");
+    // The server puts the actionable reason in `detail` (for example a product
+    // that only ships within the US). Prefer it over the generic label whenever
+    // it is a plain string -- otherwise the customer just sees "Failed to get
+    // shipping rates" and has no idea what to do differently.
+    if (!res.ok) {
+      throw new Error(
+        typeof data.detail === "string" && data.detail ? data.detail : data.error || "Could not fetch shipping rates"
+      );
+    }
 
     const list = document.getElementById("rates-list");
     list.hidden = false;

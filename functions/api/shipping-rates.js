@@ -83,7 +83,7 @@ export async function onRequestPost({ request, env }) {
         });
 
         const data = await res.json();
-          if (!res.ok) return jsonError(res.status, data);
+          if (!res.ok) return jsonError(res.status, printfulErrorMessage(data));
 
         const rates = (data.result || []).map((r) => ({
                   id: r.id,
@@ -98,6 +98,33 @@ export async function onRequestPost({ request, env }) {
   } catch (err) {
           return jsonError(500, { message: err.message });
   }
+}
+
+// Printful refuses rates when an item cannot ship to the destination at all,
+// replying with something like:
+//   This product "Acrylic Ornaments (Circle)" ships to United States only and
+//   the current shipping address is outside of this region.
+// The raw body is a nested object, so passing it straight through leaves the
+// customer with our generic "Failed to get shipping rates" and no idea why. Turn
+// it into one sentence naming the product and the region it is limited to.
+// Note: some products really are restricted by Printful -- the acrylic ornaments
+// are US-only at their end regardless of what this shop allows.
+function printfulErrorMessage(data) {
+  const level1 = typeof data === "string" ? data : (data && (data.result || data.error || data.message)) || "";
+  const text =
+    typeof level1 === "string"
+      ? level1
+      : (level1 && (level1.message || level1.reason)) || "";
+
+  const limited = String(text).match(/This product "([^"]+)" ships to ([^.]+) only/i);
+  if (limited) {
+    const product = limited[1];
+    const region = limited[2].trim();
+    const where = region.toLowerCase() === "united states" ? "the United States" : region;
+    return `"${product}" can only be shipped within ${where}, so it can't be delivered to this address.`;
+  }
+
+  return String(text) || "Could not get shipping rates for this address.";
 }
 
 function jsonError(status, detail) {
