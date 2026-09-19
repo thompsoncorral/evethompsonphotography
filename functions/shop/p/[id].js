@@ -68,9 +68,24 @@ export async function onRequestGet({ params, request }) {
   const images = (product.images && product.images.length ? product.images : [product.thumbnail]).filter(Boolean);
   const primaryImage = images[0] || "";
 
+  // Collapsed onto a single line: a meta description and JSON-LD cannot contain
+  // line breaks, and search engines want one continuous sentence.
   const descriptionText = (product.description || "")
     .replace(/<[^>]+>/g, " ")
     .replace(/\s+/g, " ")
+    .trim();
+
+  // The same description for the page itself, with its line breaks kept. Product
+  // copy is written as separate bulleted lines -- material, sizes, thickness,
+  // disclaimers -- so collapsing the whitespace here ran every bullet together
+  // into one paragraph with the bullets buried mid-sentence. Printed inside a
+  // <p class="narrow-page__intro">, which is white-space: pre-line.
+  const descriptionBody = (product.description || "")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/
+\n?/g, "\n")
+    .replace(/[^\S\n]+/g, " ")
+    .replace(/ *\n */g, "\n")
     .trim();
   const metaDescription = (
     descriptionText || `${product.name}, printed on demand from Eve Thompson's photography and shipped to your door.`
@@ -138,7 +153,7 @@ ${galleryHtml}
 </div>
 <h1 class="narrow-page__title">${escapeHtml(product.name)}</h1>
 <p class="product-page__price">${escapeHtml(priceLabel)}</p>
-${descriptionText ? `<p class="narrow-page__intro">${escapeHtml(descriptionText)}</p>` : ""}
+${descriptionBody ? `<p class="narrow-page__intro">${escapeHtml(descriptionBody)}</p>` : ""}
 <a href="/shop/?product=${product.id}" class="form-submit-btn product-page__cta">Shop this design</a>
 </main>
 
