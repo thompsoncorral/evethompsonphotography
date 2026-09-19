@@ -12,6 +12,7 @@
 // can't change what gets charged.
 
 import Stripe from "stripe";
+import { applyBundles } from "./_bundles.js";
 
 const PRINTFUL_BASE = "https://api.printful.com";
 
@@ -39,6 +40,12 @@ export async function onRequestPost({ request, env }) {
       if (!recipient || !recipient.email || !recipient.country_code || !recipient.zip) {
               return jsonError(400, "recipient (with email, country_code, zip) required");
       }
+      // United States only for now. This is the authoritative check -- the
+      // shipping-rates endpoint refuses non-US too, and the form only offers US,
+      // but neither of those can be relied on since this is where money is taken.
+      if (String(recipient.country_code).trim().toUpperCase() !== "US") {
+              return jsonError(400, "We currently ship within the United States only.");
+      }
 
   const stripe = new Stripe(env.STRIPE_SECRET_KEY, {
           httpClient: Stripe.createFetchHttpClient(),
@@ -50,6 +57,13 @@ export async function onRequestPost({ request, env }) {
         const lineItems = [];
           const orderItems = [];
           const shippingItems = []; // catalog variant_id, only needed for the rates call below
+
+        // Two passes. First resolve every line against Printful, then let any
+        // quantity deal reprice the resolved lines, then build the Stripe and
+        // Printful payloads from the result. One pass would write the early
+        // lines into Stripe before a later line had revealed that the cart
+        // completes a deal.
+        const resolved = [];
 
         for (const cartLine of items) {
                   const detailRes = await fetch(`${PRINTFUL_BASE}/sync/variant/${cartLine.variant_id}`, {
@@ -71,31 +85,59 @@ export async function onRequestPost({ request, env }) {
 
             const detailData = await detailRes.json();
                   const variant = detailData.result.sync_variant || detailData.result;
-                  const unitAmount = Math.round(parseFloat(variant.retail_price) * 100);
 
+            resolved.push({
+                        // variant.id is the sync_variant_id; variant.variant_id is the
+                        // underlying catalog variant, which only the shipping rates call
+                        // wants. sync_product_id is what identifies the design, so a deal
+                        // can match on products rather than individual sizes/shapes.
+                        syncVariantId: variant.id,
+                        syncProductId: variant.sync_product_id,
+                        catalogVariantId: variant.variant_id,
+                        name: variant.name,
+                        currency: (variant.currency || "usd").toLowerCase(),
+                        quantity: cartLine.quantity,
+                        unitAmount: Math.round(parseFloat(variant.retail_price) * 100),
+            });
+        }
+
+        // Quantity deals -- see _bundles.js for why this lives here rather than in
+        // Printful or Stripe. The same figure becomes both the Stripe unit_amount
+        // and the Printful retail_price below, so what the customer pays and what
+        // Printful is told can never disagree.
+        const { lines: pricedLines, applied: appliedBundles } = applyBundles(resolved);
+        if (appliedBundles.length) {
+            console.log("Applied bundle pricing", JSON.stringify(appliedBundles));
+        }
+
+        for (const line of pricedLines) {
             lineItems.push({
                         price_data: {
-                                      currency: (variant.currency || "usd").toLowerCase(),
+                                      currency: line.currency,
                                       product_data: {
-                                                      name: variant.name,
+                                                      name: line.name,
                                       },
-                                      unit_amount: unitAmount,
+                                      unit_amount: line.unitAmount,
                         },
-                        quantity: cartLine.quantity,
+                        quantity: line.quantity,
             });
 
             orderItems.push({
-                        sync_variant_id: variant.id,
-                        quantity: cartLine.quantity,
-                        retail_price: variant.retail_price,
+                        sync_variant_id: line.syncVariantId,
+                        quantity: line.quantity,
+                        // The price the customer actually paid, not Printful's list
+                        // price. Used on international customs labels and for Printful's
+                        // own profit reporting; it does not change what Printful bills,
+                        // which is always wholesale.
+                        retail_price: (line.unitAmount / 100).toFixed(2),
             });
 
             // Printful's Order Creation API (above) wants sync_variant_id, but its
             // Shipping Rate Calculation API wants the underlying catalog
             // variant_id instead -- see the long comment in shipping-rates.js.
             shippingItems.push({
-                        quantity: cartLine.quantity,
-                        variant_id: variant.variant_id,
+                        quantity: line.quantity,
+                        variant_id: line.catalogVariantId,
             });
         }
 

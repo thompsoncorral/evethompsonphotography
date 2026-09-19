@@ -30,6 +30,11 @@ export async function onRequestPost({ request, env }) {
       if (!recipient || !recipient.country_code || !recipient.zip) {
               return jsonError(400, "recipient.country_code and recipient.zip are required");
       }
+      // United States only for now. Checked here as well as at checkout so a
+      // non-US address is told before filling in the rest of the form.
+      if (String(recipient.country_code).trim().toUpperCase() !== "US") {
+              return jsonError(400, "We currently ship within the United States only.");
+      }
       if (!Array.isArray(items) || items.length === 0) {
               return jsonError(400, "items must be a non-empty array");
       }

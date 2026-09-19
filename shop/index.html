@@ -180,10 +180,11 @@
             <label>ZIP / postal code
               <input type="text" name="zip" required />
             </label>
-            <label>Country code
-              <input type="text" name="country_code" placeholder="e.g. US" required maxlength="2" />
+            <label>Country
+              <input type="text" name="country_code" value="US" readonly required maxlength="2" />
             </label>
           </div>
+          <p class="form-hint">Shipping within the United States only for now.</p>
           <label>Phone (required for express shipping)
             <input type="tel" name="phone" />
           </label>
