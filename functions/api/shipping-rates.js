@@ -16,6 +16,8 @@
 // GET /sync/variant/{id}, which returns both the sync id and the
 // underlying catalog variant_id, and use that catalog id here.
 
+import { isBlockedCountry, BLOCKED_COUNTRY_MESSAGE } from "./_shipping-zones.js";
+
 const PRINTFUL_BASE = "https://api.printful.com";
 
 export async function onRequestPost({ request, env }) {
@@ -30,10 +32,11 @@ export async function onRequestPost({ request, env }) {
       if (!recipient || !recipient.country_code || !recipient.zip) {
               return jsonError(400, "recipient.country_code and recipient.zip are required");
       }
-      // United States only for now. Checked here as well as at checkout so a
-      // non-US address is told before filling in the rest of the form.
-      if (String(recipient.country_code).trim().toUpperCase() !== "US") {
-              return jsonError(400, "We currently ship within the United States only.");
+      // No EU shipping -- see _shipping-zones.js for why. Checked here as well as
+      // at checkout so the customer is told before filling in the rest of the
+      // form, not after.
+      if (isBlockedCountry(recipient.country_code)) {
+              return jsonError(400, BLOCKED_COUNTRY_MESSAGE);
       }
       if (!Array.isArray(items) || items.length === 0) {
               return jsonError(400, "items must be a non-empty array");

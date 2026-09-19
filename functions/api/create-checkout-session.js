@@ -13,6 +13,7 @@
 
 import Stripe from "stripe";
 import { applyBundles } from "./_bundles.js";
+import { isBlockedCountry, BLOCKED_COUNTRY_MESSAGE } from "./_shipping-zones.js";
 
 const PRINTFUL_BASE = "https://api.printful.com";
 
@@ -40,11 +41,12 @@ export async function onRequestPost({ request, env }) {
       if (!recipient || !recipient.email || !recipient.country_code || !recipient.zip) {
               return jsonError(400, "recipient (with email, country_code, zip) required");
       }
-      // United States only for now. This is the authoritative check -- the
-      // shipping-rates endpoint refuses non-US too, and the form only offers US,
-      // but neither of those can be relied on since this is where money is taken.
-      if (String(recipient.country_code).trim().toUpperCase() !== "US") {
-              return jsonError(400, "We currently ship within the United States only.");
+      // No EU shipping -- see _shipping-zones.js. This is the authoritative
+      // check: the rates endpoint refuses blocked countries too and the form only
+      // offers allowed ones, but neither of those can be relied on, since this is
+      // where money is taken.
+      if (isBlockedCountry(recipient.country_code)) {
+              return jsonError(400, BLOCKED_COUNTRY_MESSAGE);
       }
 
   const stripe = new Stripe(env.STRIPE_SECRET_KEY, {

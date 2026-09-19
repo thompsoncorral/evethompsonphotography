@@ -828,6 +828,18 @@ async function handleShippingSubmit(e) {
 
     const list = document.getElementById("rates-list");
     list.hidden = false;
+
+    // Printful returns no rates for a destination it cannot reach at all. Without
+    // this the customer got a blank panel and no explanation of why they could
+    // not continue.
+    if (!data.rates.length) {
+      list.innerHTML =
+        '<p class="rate-option">Sorry — we can\'t ship to that address yet. If you think that\'s a mistake, please get in touch.</p>';
+      selectedRate = null;
+      updateCheckoutAvailability();
+      return;
+    }
+
     list.innerHTML = data.rates
       .map(
         (r, i) => `

@@ -513,7 +513,8 @@ body {
 .shipping-section h3 { font-size: 0.95rem; margin-bottom: 0.5rem; }
 .shipping-section form { display: flex; flex-direction: column; gap: 0.6rem; }
 .shipping-section label { font-size: 0.8rem; display: flex; flex-direction: column; gap: 0.25rem; }
-.shipping-section input {
+.shipping-section input,
+.shipping-section select {
     padding: 0.5rem; border: 1px solid var(--line); border-radius: 6px; font-size: 0.9rem;
 }
 .field-row { display: flex; gap: 0.5rem; }
