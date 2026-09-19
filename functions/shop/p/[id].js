@@ -82,8 +82,7 @@ export async function onRequestGet({ params, request }) {
   // <p class="narrow-page__intro">, which is white-space: pre-line.
   const descriptionBody = (product.description || "")
     .replace(/<[^>]+>/g, " ")
-    .replace(/
-\n?/g, "\n")
+    .replace(/\r\n?/g, "\n")
     .replace(/[^\S\n]+/g, " ")
     .replace(/ *\n */g, "\n")
     .trim();
