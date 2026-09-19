@@ -704,6 +704,13 @@ body {
     color: var(--ink-soft);
     line-height: 1.6;
     margin: 0 0 2.5rem;
+    /* Product descriptions arrive with real line breaks in them -- the material,
+       sizes and disclaimers are each their own line, starting with a bullet.
+       Without this, HTML collapses those breaks into spaces and the whole
+       description runs together on one line with the bullets buried mid-
+       sentence. pre-line keeps the author's line breaks while still wrapping
+       long lines normally and collapsing runs of spaces. */
+    white-space: pre-line;
 }
 
 .page-card {
