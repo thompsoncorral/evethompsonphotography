@@ -4,6 +4,8 @@
 // lives only in this server-side function (Cloudflare env var), never in
 // the browser.
 
+import { descriptionFor } from "./_product-descriptions.js";
+
 const PRINTFUL_BASE = "https://api.printful.com";
 
 // A one-off custom order (see /shop/custom-order/) gets built in Printful
@@ -173,7 +175,14 @@ export async function onRequestGet({ env, request, waitUntil }) {
         // after retrying, or the shape isn't what's expected, the product
         // still renders fine, just without a description.
         const firstCatalogVariantId = (detailData.result.sync_variants || [])[0]?.variant_id || null;
-        const description = firstCatalogVariantId ? await getCatalogDescription(firstCatalogVariantId) : null;
+        const catalogDescription = firstCatalogVariantId
+          ? await getCatalogDescription(firstCatalogVariantId)
+          : null;
+        // A description written for this product wins over Printful's catalog
+        // copy for the blank (see _product-descriptions.js for why there is no
+        // other way to show one). Anything not listed there keeps the catalog
+        // text, so this can only ever improve a product, never blank it.
+        const description = descriptionFor(product.id, catalogDescription);
 
         return {
           id: product.id,
