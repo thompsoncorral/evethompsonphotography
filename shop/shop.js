@@ -87,7 +87,9 @@ const STORY_BANNERS = {
       // Kept in step with the wording on the banner image itself: "two shapes",
       // not four. The product description says four, but that is Printful's
       // template copy and only Circle and Rectangle are actually offered.
-      alt: "Holiday Ornaments - acrylic, two shapes, ready to hang",
+      // The tag on this image carries an offer, so the alt text has to carry it
+      // too -- otherwise a screen reader is the one place the discount is missing.
+      alt: "Holiday Ornaments - acrylic, two shapes, ready to hang. Buy 4 or more for $10 each, usually $11.50.",
       position: "before",
     },
     {
