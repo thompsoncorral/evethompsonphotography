@@ -75,7 +75,7 @@ export const BLOCKED_COUNTRY_CODES = [...EU_MEMBER_STATES, ...EU_OUTERMOST_REGIO
 // To change the offer, edit these two values and nothing else. Setting
 // FREE_SHIPPING_THRESHOLD to 0 makes it free on every qualifying US order.
 // ---------------------------------------------------------------------------
-export const FREE_SHIPPING_THRESHOLD = 150; // US dollars, on the goods subtotal
+export const FREE_SHIPPING_THRESHOLD = 100; // US dollars, on the goods subtotal
 
 // The 48 contiguous states plus DC. Deliberately NOT AK or HI.
 const US_MAINLAND_STATES = new Set([
