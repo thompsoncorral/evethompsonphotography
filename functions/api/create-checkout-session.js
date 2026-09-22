@@ -13,7 +13,13 @@
 
 import Stripe from "stripe";
 import { applyBundles } from "./_bundles.js";
-import { isBlockedCountry, BLOCKED_COUNTRY_MESSAGE } from "./_shipping-zones.js";
+import {
+  isBlockedCountry,
+  BLOCKED_COUNTRY_MESSAGE,
+  FREE_SHIPPING_RATE_ID,
+  isFreeShippingDestination,
+  qualifiesForFreeShipping,
+} from "./_shipping-zones.js";
 
 const PRINTFUL_BASE = "https://api.printful.com";
 
@@ -164,17 +170,51 @@ export async function onRequestPost({ request, env }) {
           const ratesData = await ratesRes.json();
           if (!ratesRes.ok) return jsonError(400, { message: "Could not verify shipping rate", detail: ratesData });
 
-        const chosenRate = (ratesData.result || []).find((r) => r.id === shipping_id);
-          if (!chosenRate) return jsonError(400, "Selected shipping option is no longer available");
+        // What the customer pays for goods -- after any bundle discount, using
+        // the same figures that go to Stripe. This is the subtotal the free
+        // shipping threshold is measured against.
+        const goodsSubtotal = pricedLines.reduce(
+                  (sum, l) => sum + (l.unitAmount / 100) * l.quantity, 0);
 
-        lineItems.push({
-                  price_data: {
-                              currency: (chosenRate.currency || "usd").toLowerCase(),
-                              product_data: { name: `Shipping - ${chosenRate.name}` },
-                              unit_amount: Math.round(parseFloat(chosenRate.rate) * 100),
-                  },
-                  quantity: 1,
-        });
+        const realRates = ratesData.result || [];
+        let printfulShippingId;
+        let shipForFree = false;
+
+        if (shipping_id === FREE_SHIPPING_RATE_ID) {
+                  // The customer picked our free option. It is only honoured if
+                  // the same rule the rates endpoint used still holds -- an
+                  // order can be edited in another tab between quote and pay.
+                  if (!qualifiesForFreeShipping(
+                            recipient.country_code, recipient.state_code, goodsSubtotal)) {
+                            return jsonError(400,
+                                      "Free shipping is not available for this order.");
+                  }
+                  // Printful still has to be told how to post it, and it does not
+                  // know about our synthetic id, so the cheapest real method is
+                  // recorded on the order. We absorb that cost; the customer does not.
+                  const fallback = realRates[0];
+                  if (!fallback) {
+                            return jsonError(400, "No shipping method is available for this address.");
+                  }
+                  printfulShippingId = fallback.id;
+                  shipForFree = true;
+        } else {
+                  const chosenRate = realRates.find((r) => r.id === shipping_id);
+                  if (!chosenRate) return jsonError(400, "Selected shipping option is no longer available");
+                  printfulShippingId = chosenRate.id;
+        }
+
+        if (!shipForFree) {
+                  const paidRate = realRates.find((r) => r.id === printfulShippingId);
+                  lineItems.push({
+                            price_data: {
+                                      currency: (paidRate.currency || "usd").toLowerCase(),
+                                      product_data: { name: `Shipping - ${paidRate.name}` },
+                                      unit_amount: Math.round(parseFloat(paidRate.rate) * 100),
+                            },
+                            quantity: 1,
+                  });
+        }
 
         // 3. Stash the verified order payload in KV, keyed by a token we control.
         // We look this up again in the Stripe webhook once payment succeeds, so
@@ -196,7 +236,7 @@ export async function onRequestPost({ request, env }) {
                                               phone: recipient.phone || "",
                                 },
                                 items: orderItems,
-                                shipping: chosenRate.id,
+                                shipping: printfulShippingId,
                     }),
               { expirationTtl: 60 * 60 * 24 } // 24h; cleaned up sooner on success anyway
                   );

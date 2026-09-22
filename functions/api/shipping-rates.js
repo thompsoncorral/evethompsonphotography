@@ -16,9 +16,61 @@
 // GET /sync/variant/{id}, which returns both the sync id and the
 // underlying catalog variant_id, and use that catalog id here.
 
-import { isBlockedCountry, BLOCKED_COUNTRY_MESSAGE } from "./_shipping-zones.js";
+import {
+  isBlockedCountry,
+  BLOCKED_COUNTRY_MESSAGE,
+  isFreeShippingDestination,
+  qualifiesForFreeShipping,
+  FREE_SHIPPING_RATE_ID,
+  FREE_SHIPPING_THRESHOLD,
+} from "./_shipping-zones.js";
 
 const PRINTFUL_BASE = "https://api.printful.com";
+
+function printfulHeaders(env) {
+  const headers = {
+    Authorization: `Bearer ${env.PRINTFUL_TOKEN}`,
+    "Content-Type": "application/json",
+  };
+  // Only needed for account-level tokens that can see multiple stores.
+  if (env.PRINTFUL_STORE_ID) headers["X-PF-Store-Id"] = env.PRINTFUL_STORE_ID;
+  return headers;
+}
+
+// The goods subtotal, straight from Printful's own retail prices for the cart's
+// variants -- never from the browser, which could claim any total it liked.
+// Returns null if Printful cannot be asked, in which case no free option is
+// offered rather than a free option that the checkout might later refuse.
+async function cartSubtotal(env, items) {
+  try {
+    const res = await fetch(`${PRINTFUL_BASE}/sync/products?limit=100`, {
+      headers: printfulHeaders(env),
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+
+    // every variant of every product, keyed by its sync id
+    const byId = new Map();
+    for (const product of data.result || []) {
+      for (const v of (product.sync_variants || product.variants || [])) {
+        byId.set(String(v.id), parseFloat(v.retail_price || v.price || "0"));
+      }
+    }
+
+    let total = 0;
+    let known = 0;
+    for (const item of items) {
+      const price = byId.get(String(item.variant_id));
+      if (price === undefined) continue;
+      total += price * (item.quantity || 1);
+      known += 1;
+    }
+    // If we could not price every line, do not pretend we know the total.
+    return known === items.length ? total : null;
+  } catch {
+    return null;
+  }
+}
 
 export async function onRequestPost({ request, env }) {
       let body;
@@ -91,6 +143,23 @@ export async function onRequestPost({ request, env }) {
                   rate: r.rate,
                   currency: r.currency,
         }));
+
+        // Free shipping, offered only when it is earned. Placed FIRST so it is
+        // the option already selected when the customer reaches the page.
+        // Guarded by the same rule the checkout enforces, so this can never
+        // advertise something the checkout would then refuse to honour.
+        if (isFreeShippingDestination(recipient.country_code, recipient.state_code)) {
+                  const subtotal = await cartSubtotal(env, items);
+                  if (qualifiesForFreeShipping(
+                            recipient.country_code, recipient.state_code, subtotal)) {
+                            rates.unshift({
+                                      id: FREE_SHIPPING_RATE_ID,
+                                      name: `Free shipping (orders over $${FREE_SHIPPING_THRESHOLD})`,
+                                      rate: "0.00",
+                                      currency: "usd",
+                            });
+                  }
+        }
 
         return new Response(JSON.stringify({ rates }), {
                   headers: { "Content-Type": "application/json" },

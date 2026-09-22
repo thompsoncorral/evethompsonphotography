@@ -60,6 +60,51 @@ const EU_OUTERMOST_REGIONS = ["AX", "GF", "GP", "MQ", "YT", "RE", "MF"];
 
 export const BLOCKED_COUNTRY_CODES = [...EU_MEMBER_STATES, ...EU_OUTERMOST_REGIONS];
 
+// ---------------------------------------------------------------------------
+// Free shipping, and why it is not simply "everywhere"
+//
+// Printful bills us the real postage, and a 40x60 canvas to a far corner of the
+// country costs far more than one to a neighbouring state. Absorbing that on a
+// $11.50 ornament would wipe out the sale. So free shipping is offered on
+// ORDERS OVER A THRESHOLD, to the US mainland only.
+//
+// Alaska and Hawaii are excluded on purpose: postage there can run several times
+// the mainland rate, and on a $395 canvas that difference is the whole margin.
+// Customers there still see real, calculated rates -- they simply pay them.
+//
+// To change the offer, edit these two values and nothing else. Setting
+// FREE_SHIPPING_THRESHOLD to 0 makes it free on every qualifying US order.
+// ---------------------------------------------------------------------------
+export const FREE_SHIPPING_THRESHOLD = 150; // US dollars, on the goods subtotal
+
+// The 48 contiguous states plus DC. Deliberately NOT AK or HI.
+const US_MAINLAND_STATES = new Set([
+  "AL", "AZ", "AR", "CA", "CO", "CT", "DE", "DC", "FL", "GA",
+  "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA",
+  "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", "NM",
+  "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD",
+  "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY",
+]);
+
+// The id our free rate travels under. Chosen to be unmistakable: Printful's own
+// rate ids look like "STANDARD" / "EXPEDITED", so this can never collide with
+// one of theirs and be mistaken for a real postage method.
+export const FREE_SHIPPING_RATE_ID = "FREE_US_MAIN";
+
+// Is this destination one we are willing to post to at our own cost?
+export function isFreeShippingDestination(countryCode, stateCode) {
+  const country = String(countryCode || "").trim().toUpperCase();
+  const state = String(stateCode || "").trim().toUpperCase();
+  if (country !== "US") return false;
+  return US_MAINLAND_STATES.has(state);
+}
+
+// The whole offer: right country, and a big enough basket to carry the postage.
+export function qualifiesForFreeShipping(countryCode, stateCode, subtotalDollars) {
+  if (!isFreeShippingDestination(countryCode, stateCode)) return false;
+  return Number(subtotalDollars) >= FREE_SHIPPING_THRESHOLD;
+}
+
 const BLOCKED = new Set(BLOCKED_COUNTRY_CODES);
 
 // Normalise however the country arrives ("us", " US ", "Us") and decide.
