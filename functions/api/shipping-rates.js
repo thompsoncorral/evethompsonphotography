@@ -23,8 +23,9 @@ import {
   qualifiesForFreeShipping,
   FREE_SHIPPING_RATE_ID,
   FREE_SHIPPING_THRESHOLD,
-  isCanvasLine,
+  cartHasCanvas,
 } from "./_shipping-zones.js";
+import { applyBundles } from "./_bundles.js"
 
 const PRINTFUL_BASE = "https://api.printful.com";
 
@@ -38,48 +39,15 @@ function printfulHeaders(env) {
   return headers;
 }
 
-// The goods subtotal, straight from Printful's own retail prices for the cart's
-// variants -- never from the browser, which could claim any total it liked.
-// Returns null if Printful cannot be asked, in which case no free option is
-// offered rather than a free option that the checkout might later refuse.
-async function cartSubtotal(env, items) {
-  try {
-    const res = await fetch(`${PRINTFUL_BASE}/sync/products?limit=100`, {
-      headers: printfulHeaders(env),
-    });
-    if (!res.ok) return null;
-    const data = await res.json();
-
-    // every variant of every product, keyed by its sync id. Each entry also
-    // remembers whether its product is a canvas, since the free shipping offer
-    // is limited to orders containing one.
-    const byId = new Map();
-    let hasCanvas = false;
-    for (const product of data.result || []) {
-      const productIsCanvas = isCanvasLine(product.name);
-      for (const v of (product.sync_variants || product.variants || [])) {
-        byId.set(String(v.id), {
-          price: parseFloat(v.retail_price || v.price || "0"),
-          isCanvas: productIsCanvas || isCanvasLine(v.name),
-        });
-      }
-    }
-
-    let total = 0;
-    let known = 0;
-    for (const item of items) {
-      const found = byId.get(String(item.variant_id));
-      if (!found) continue;
-      total += found.price * (item.quantity || 1);
-      if (found.isCanvas) hasCanvas = true;
-      known += 1;
-    }
-    // If we could not price every line, do not pretend we know the total.
-    return known === items.length ? { total, hasCanvas } : null;
-  } catch {
-    return null;
-  }
-}
+// The goods subtotal and the canvas check now come from the per-line
+// GET /sync/variant/{id} lookups below, which this endpoint already makes to
+// resolve catalog variant ids. Printful's list endpoint does NOT return
+// variant-level detail -- /sync/products gives each product's variant COUNT,
+// not its variants -- so the previous attempt here to build a variant -> price
+// map from that listing found nothing and silently reported "no subtotal",
+// which meant the free shipping option was never offered to anyone. Reading
+// the lines we have already fetched removes that whole class of failure and
+// costs no extra Printful calls.
 
 export async function onRequestPost({ request, env }) {
       let body;
@@ -111,21 +79,33 @@ export async function onRequestPost({ request, env }) {
 
   try {
           // Resolve each cart line's sync_variant_id to its catalog variant_id.
-        const resolvedItems = [];
-          for (const item of items) {
-                    const variantRes = await fetch(`${PRINTFUL_BASE}/sync/variant/${item.variant_id}`, {
-                                headers,
-                    }).catch(() => null);
-                    if (!variantRes || !variantRes.ok) {
-                                return jsonError(400, { message: `Could not verify variant ${item.variant_id} with Printful` });
-                    }
-                    const variantData = await variantRes.json();
-                    const syncVariant = variantData.result.sync_variant || variantData.result;
-                    resolvedItems.push({
-                                quantity: item.quantity,
-                                variant_id: syncVariant.variant_id,
-                    });
-          }
+          // The same response carries the variant's own retail_price, its name and
+          // its sync_product_id, which is everything the subtotal and the canvas
+          // check below need -- so neither costs an extra Printful call.
+          const resolvedItems = [];
+          const resolvedLines = [];
+            for (const item of items) {
+                      const variantRes = await fetch(`${PRINTFUL_BASE}/sync/variant/${item.variant_id}`, {
+                                  headers,
+                      }).catch(() => null);
+                      if (!variantRes || !variantRes.ok) {
+                                  return jsonError(400, { message: `Could not verify variant ${item.variant_id} with Printful` });
+                      }
+                      const variantData = await variantRes.json();
+                      const syncVariant = variantData.result.sync_variant || variantData.result;
+                      resolvedItems.push({
+                                  quantity: item.quantity,
+                                  variant_id: syncVariant.variant_id,
+                      });
+                      resolvedLines.push({
+                                  syncVariantId: syncVariant.id,
+                                  syncProductId: syncVariant.sync_product_id,
+                                  catalogVariantId: syncVariant.variant_id,
+                                  name: syncVariant.name,
+                                  quantity: item.quantity,
+                                  unitAmount: Math.round(parseFloat(syncVariant.retail_price || "0") * 100),
+                      });
+            }
 
         const res = await fetch(`${PRINTFUL_BASE}/shipping/rates`, {
                   method: "POST",
@@ -158,12 +138,20 @@ export async function onRequestPost({ request, env }) {
         // Guarded by the same rule the checkout enforces, so this can never
         // advertise something the checkout would then refuse to honour.
         if (isFreeShippingDestination(recipient.country_code, recipient.state_code)) {
-                  const cart = await cartSubtotal(env, items);
+                  // The same figure the checkout will charge: quantity deals
+                  // applied first, then summed, so this can never advertise an
+                  // offer the checkout would then refuse. Mirrors
+                  // create-checkout-session.js exactly.
+                  const { lines: pricedLines } = applyBundles(resolvedLines);
+                  const subtotal = pricedLines.reduce(
+                            (sum, l) => sum + (l.unitAmount / 100) * l.quantity, 0);
+                  const hasCanvas = cartHasCanvas(pricedLines);
+
                   if (qualifiesForFreeShipping(
                             recipient.country_code,
                             recipient.state_code,
-                            cart ? cart.total : null,
-                            cart ? cart.hasCanvas : false)) {
+                            subtotal,
+                            hasCanvas)) {
                             rates.unshift({
                                       id: FREE_SHIPPING_RATE_ID,
                                       name: `Free shipping on canvas (orders over $${FREE_SHIPPING_THRESHOLD})`,
