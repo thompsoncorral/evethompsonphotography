@@ -23,6 +23,7 @@ import {
   qualifiesForFreeShipping,
   FREE_SHIPPING_RATE_ID,
   FREE_SHIPPING_THRESHOLD,
+  isCanvasLine,
 } from "./_shipping-zones.js";
 
 const PRINTFUL_BASE = "https://api.printful.com";
@@ -49,24 +50,32 @@ async function cartSubtotal(env, items) {
     if (!res.ok) return null;
     const data = await res.json();
 
-    // every variant of every product, keyed by its sync id
+    // every variant of every product, keyed by its sync id. Each entry also
+    // remembers whether its product is a canvas, since the free shipping offer
+    // is limited to orders containing one.
     const byId = new Map();
+    let hasCanvas = false;
     for (const product of data.result || []) {
+      const productIsCanvas = isCanvasLine(product.name);
       for (const v of (product.sync_variants || product.variants || [])) {
-        byId.set(String(v.id), parseFloat(v.retail_price || v.price || "0"));
+        byId.set(String(v.id), {
+          price: parseFloat(v.retail_price || v.price || "0"),
+          isCanvas: productIsCanvas || isCanvasLine(v.name),
+        });
       }
     }
 
     let total = 0;
     let known = 0;
     for (const item of items) {
-      const price = byId.get(String(item.variant_id));
-      if (price === undefined) continue;
-      total += price * (item.quantity || 1);
+      const found = byId.get(String(item.variant_id));
+      if (!found) continue;
+      total += found.price * (item.quantity || 1);
+      if (found.isCanvas) hasCanvas = true;
       known += 1;
     }
     // If we could not price every line, do not pretend we know the total.
-    return known === items.length ? total : null;
+    return known === items.length ? { total, hasCanvas } : null;
   } catch {
     return null;
   }
@@ -149,12 +158,15 @@ export async function onRequestPost({ request, env }) {
         // Guarded by the same rule the checkout enforces, so this can never
         // advertise something the checkout would then refuse to honour.
         if (isFreeShippingDestination(recipient.country_code, recipient.state_code)) {
-                  const subtotal = await cartSubtotal(env, items);
+                  const cart = await cartSubtotal(env, items);
                   if (qualifiesForFreeShipping(
-                            recipient.country_code, recipient.state_code, subtotal)) {
+                            recipient.country_code,
+                            recipient.state_code,
+                            cart ? cart.total : null,
+                            cart ? cart.hasCanvas : false)) {
                             rates.unshift({
                                       id: FREE_SHIPPING_RATE_ID,
-                                      name: `Free shipping (orders over $${FREE_SHIPPING_THRESHOLD})`,
+                                      name: `Free shipping on canvas (orders over $${FREE_SHIPPING_THRESHOLD})`,
                                       rate: "0.00",
                                       currency: "usd",
                             });

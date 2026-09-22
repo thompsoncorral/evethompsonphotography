@@ -72,10 +72,45 @@ export const BLOCKED_COUNTRY_CODES = [...EU_MEMBER_STATES, ...EU_OUTERMOST_REGIO
 // the mainland rate, and on a $395 canvas that difference is the whole margin.
 // Customers there still see real, calculated rates -- they simply pay them.
 //
-// To change the offer, edit these two values and nothing else. Setting
-// FREE_SHIPPING_THRESHOLD to 0 makes it free on every qualifying US order.
+// CANVAS ONLY. The offer applies when the order CONTAINS A CANVAS, not merely
+// when it is large enough. A canvas carries its own postage several times over:
+// the 24x36 leaves about $9 of margin after Printful's base cost and then
+// $10.39 of postage, while the 40x60 leaves about $188. An $11.50 ornament
+// earns $2.16, so the same $5.49 of postage would be a loss on every order.
+//
+// Anything else in the basket ships free alongside the canvas, because postage
+// is charged per parcel rather than per item.
+//
+// To change the offer, edit the values below and nothing else. Setting
+// FREE_SHIPPING_THRESHOLD to 0 makes every qualifying US canvas order free.
 // ---------------------------------------------------------------------------
 export const FREE_SHIPPING_THRESHOLD = 100; // US dollars, on the goods subtotal
+
+// HOW A CANVAS IS RECOGNISED
+// Printful names a variant "<product name> / <size>", and every canvas in this
+// shop carries "canvas" in its product name. Matching on the name rather than on
+// product ids is deliberate: ids are per-store, so a list of them would have to
+// be maintained twice once the photography and Etsy stores hold the same items.
+//
+// If a canvas is ever named without one of these words in Printful, add the word
+// here -- otherwise that canvas will not qualify for free shipping.
+const CANVAS_NAME_HINTS = ["canvas"];
+
+export function isCanvasLine(text) {
+  const name = String(text || "").toLowerCase();
+  return CANVAS_NAME_HINTS.some((hint) => name.includes(hint));
+}
+
+// Does this cart contain a canvas? Takes plain strings or objects with a `name`.
+// Both the resolved Printful variants and the priced cart lines have one, and
+// both come from Printful rather than from the browser.
+export function cartHasCanvas(lines) {
+  if (!Array.isArray(lines)) return false;
+  return lines.some((line) => {
+    if (!line) return false;
+    return isCanvasLine(typeof line === "string" ? line : line.name);
+  });
+}
 
 // The 48 contiguous states plus DC. Deliberately NOT AK or HI.
 const US_MAINLAND_STATES = new Set([
@@ -99,9 +134,13 @@ export function isFreeShippingDestination(countryCode, stateCode) {
   return US_MAINLAND_STATES.has(state);
 }
 
-// The whole offer: right country, and a big enough basket to carry the postage.
-export function qualifiesForFreeShipping(countryCode, stateCode, subtotalDollars) {
+// The whole offer: right country, a canvas in the cart, and a basket big enough
+// to carry the postage. `hasCanvas` is required rather than optional -- an
+// ornament order over the threshold is refused on purpose, because that postage
+// would come out of a $2.16 margin instead of a canvas-sized one.
+export function qualifiesForFreeShipping(countryCode, stateCode, subtotalDollars, hasCanvas) {
   if (!isFreeShippingDestination(countryCode, stateCode)) return false;
+  if (!hasCanvas) return false;
   return Number(subtotalDollars) >= FREE_SHIPPING_THRESHOLD;
 }
 

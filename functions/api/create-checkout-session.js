@@ -19,6 +19,7 @@ import {
   FREE_SHIPPING_RATE_ID,
   isFreeShippingDestination,
   qualifiesForFreeShipping,
+  cartHasCanvas,
 } from "./_shipping-zones.js";
 
 const PRINTFUL_BASE = "https://api.printful.com";
@@ -180,12 +181,17 @@ export async function onRequestPost({ request, env }) {
         let printfulShippingId;
         let shipForFree = false;
 
+        // Free shipping is canvas-only, so this order has to contain one. The
+        // names come from Printful's variant lookup above, never from the browser.
+        const orderHasCanvas = cartHasCanvas(pricedLines);
+
         if (shipping_id === FREE_SHIPPING_RATE_ID) {
                   // The customer picked our free option. It is only honoured if
                   // the same rule the rates endpoint used still holds -- an
                   // order can be edited in another tab between quote and pay.
                   if (!qualifiesForFreeShipping(
-                            recipient.country_code, recipient.state_code, goodsSubtotal)) {
+                            recipient.country_code, recipient.state_code, goodsSubtotal,
+                            orderHasCanvas)) {
                             return jsonError(400,
                                       "Free shipping is not available for this order.");
                   }
