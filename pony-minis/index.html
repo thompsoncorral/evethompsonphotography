@@ -47,7 +47,14 @@
   ul.inc li{padding:8px 0 8px 34px;position:relative;border-bottom:1px dashed #e2d6bd}
   ul.inc li::before{content:"✦";position:absolute;left:6px;color:var(--gold)}
   #booking{background:#fff;border-radius:14px;padding:20px;box-shadow:0 6px 20px rgba(0,0,0,.08);border:2px solid var(--gold)}
-  #cal-inline{width:100%;min-height:600px;overflow:auto}
+  .cal-box{width:100%;min-height:600px;overflow:auto;display:none}
+  .cal-box.show{display:block}
+  .paychoice{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin:0 auto 20px}
+  .pay-btn{font-family:'Cormorant Garamond',serif;font-size:1.35rem;font-weight:600;padding:14px 26px;border-radius:40px;border:2px solid var(--gold);
+     background:#fff;color:var(--green);cursor:pointer;min-width:210px;display:flex;flex-direction:column;align-items:center;line-height:1.2}
+  .pay-btn span{font-family:'Lato',sans-serif;font-size:.8rem;font-weight:400;color:#666;margin-top:4px}
+  .pay-btn.active{background:var(--red);color:#fff;border-color:var(--red)}
+  .pay-btn.active span{color:#f3e3c3}
   .soon{text-align:center;padding:60px 20px;font-family:'Cormorant Garamond',serif;font-size:1.4rem;color:var(--green)}
   footer{text-align:center;padding:26px;background:var(--deep);color:#e9dcc0;font-family:'Cormorant Garamond',serif}
 </style>
@@ -89,19 +96,24 @@
   </ul>
 
   <h2>Reserve Your Time</h2>
-  <p class="intro" style="margin-bottom:20px">Pick an open time below and pay to lock in your spot. Booked times disappear automatically.</p>
+  <p class="intro" style="margin-bottom:20px">Choose how you'd like to pay, then pick an open time. Booked times disappear automatically.</p>
+  <div class="paychoice" id="paychoice">
+    <button type="button" class="pay-btn" data-opt="now" id="btn-now">💳 Pay Now<span>Card · $65</span></button>
+    <button type="button" class="pay-btn" data-opt="later" id="btn-later">🎄 Pay at Session<span>$65 at the barn</span></button>
+  </div>
   <div id="booking">
-    <div id="cal-inline"></div>
+    <div id="cal-now" class="cal-box"></div>
+    <div id="cal-later" class="cal-box"></div>
   </div>
 </main>
 
 <footer>Eve Thompson Photography · Christmas Pony Minis · Brockwell Barn, Brockwell, AR</footer>
 
 <script>
-  // ===== BOOKING SETTING =====
-  // Put your Cal.com link here, e.g. "evethompson/pony-minis"
-  const CAL_LINK = "";
-  // ===========================
+  // ===== BOOKING SETTINGS (Cal.com links) =====
+  const CAL_PAY_NOW   = "";  // paid link, turned on once Stripe is connected
+  const CAL_PAY_LATER = "eve-thompson-pony-minis/pony-minis-pay-at-session";
+  // ==============================================
 
   // Snowfall
   (function(){
@@ -118,14 +130,24 @@
     }
   })();
 
-  if(!CAL_LINK){
-    document.getElementById('cal-inline').innerHTML='<div class="soon">✨ Booking opens very soon — check back shortly! ✨</div>';
-  } else {
-    (function (C, A, L) { let p = function (a, ar) { a.q.push(ar); }; let d = C.document; C.Cal = C.Cal || function () { let cal = C.Cal; let ar = arguments; if (!cal.loaded) { cal.ns = {}; cal.q = cal.q || []; d.head.appendChild(d.createElement("script")).src = A; cal.loaded = true; } if (ar[0] === L) { const api = function () { p(api, arguments); }; const namespace = ar[1]; api.q = api.q || []; if(typeof namespace === "string"){cal.ns[namespace] = cal.ns[namespace] || api;p(cal.ns[namespace], ar);p(cal, ["initNamespace", namespace]);} else p(cal, ar); return;} p(cal, ar); }; })(window, "https://app.cal.com/embed/embed.js", "init");
-    Cal("init", "pony", {origin:"https://cal.com"});
-    Cal.ns.pony("inline", { elementOrSelector:"#cal-inline", calLink: CAL_LINK, config:{ layout:"month_view", date:"2026-12-06" } });
-    Cal.ns.pony("ui", { theme:"light", styles:{ branding:{ brandColor:"#8e1b1b" } }, hideEventTypeDetails:false, layout:"month_view" });
+  (function (C, A, L) { let p = function (a, ar) { a.q.push(ar); }; let d = C.document; C.Cal = C.Cal || function () { let cal = C.Cal; let ar = arguments; if (!cal.loaded) { cal.ns = {}; cal.q = cal.q || []; d.head.appendChild(d.createElement("script")).src = A; cal.loaded = true; } if (ar[0] === L) { const api = function () { p(api, arguments); }; const namespace = ar[1]; api.q = api.q || []; if(typeof namespace === "string"){cal.ns[namespace] = cal.ns[namespace] || api;p(cal.ns[namespace], ar);p(cal, ["initNamespace", namespace]);} else p(cal, ar); return;} p(cal, ar); }; })(window, "https://app.cal.com/embed/embed.js", "init");
+
+  const opts = { now: {link: CAL_PAY_NOW, el: "cal-now"}, later: {link: CAL_PAY_LATER, el: "cal-later"} };
+  const loaded = {};
+  function show(opt){
+    document.querySelectorAll('.pay-btn').forEach(b=>b.classList.toggle('active', b.dataset.opt===opt));
+    document.querySelectorAll('.cal-box').forEach(b=>b.classList.remove('show'));
+    const o = opts[opt], box = document.getElementById(o.el);
+    box.classList.add('show');
+    if(loaded[opt]) return;
+    loaded[opt] = true;
+    if(!o.link){ box.innerHTML='<div class="soon">✨ Online card payment opens very soon — or choose “Pay at Session” to book now! ✨</div>'; return; }
+    Cal("init", opt, {origin:"https://cal.com"});
+    Cal.ns[opt]("inline", { elementOrSelector:"#"+o.el, calLink:o.link, config:{ layout:"month_view", date:"2026-12-06" } });
+    Cal.ns[opt]("ui", { theme:"light", styles:{ branding:{ brandColor:"#8e1b1b" } }, layout:"month_view" });
   }
+  document.querySelectorAll('.pay-btn').forEach(b=>b.addEventListener('click',()=>show(b.dataset.opt)));
+  show(CAL_PAY_NOW ? "now" : "later");
 </script>
 </body>
 </html>
