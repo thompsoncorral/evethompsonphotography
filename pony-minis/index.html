@@ -56,6 +56,9 @@
   .pay-btn.active{background:var(--red);color:#fff;border-color:var(--red)}
   .pay-btn.active span{color:#f3e3c3}
   .soon{text-align:center;padding:60px 20px;font-family:'Cormorant Garamond',serif;font-size:1.4rem;color:var(--green)}
+  .policy{max-width:640px;margin:30px auto 0;background:#fff;border-left:4px solid var(--red);border-radius:10px;padding:18px 22px;font-size:.95rem;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+  .policy h3{font-family:'Cormorant Garamond',serif;color:var(--green);font-size:1.4rem;margin-bottom:6px}
+  .policy p{margin:6px 0}
   footer{text-align:center;padding:26px;background:var(--deep);color:#e9dcc0;font-family:'Cormorant Garamond',serif}
 </style>
 </head>
@@ -96,14 +99,21 @@
   </ul>
 
   <h2>Reserve Your Time</h2>
-  <p class="intro" style="margin-bottom:20px">Choose how you'd like to pay, then pick an open time. Booked times disappear automatically.</p>
+  <p class="intro" style="margin-bottom:20px">A $25 booking fee holds your spot. Pay in full now, or pay the $25 deposit and the remaining $40 at your session. Then pick an open time below!</p>
   <div class="paychoice" id="paychoice">
-    <button type="button" class="pay-btn" data-opt="now" id="btn-now">💳 Pay Now<span>Card · $65</span></button>
-    <button type="button" class="pay-btn" data-opt="later" id="btn-later">🎄 Pay at Session<span>$65 at the barn</span></button>
+    <button type="button" class="pay-btn" data-opt="now" id="btn-now">💳 Pay in Full<span>$65 now</span></button>
+    <button type="button" class="pay-btn" data-opt="later" id="btn-later">🎄 $25 Deposit<span>$25 now · $40 at the barn</span></button>
   </div>
   <div id="booking">
     <div id="cal-now" class="cal-box"></div>
     <div id="cal-later" class="cal-box"></div>
+  </div>
+
+  <div class="policy">
+    <h3>Booking Policy</h3>
+    <p>Every session includes a <strong>$25 non-refundable booking fee</strong> that holds your spot.</p>
+    <p><strong>Paid in full:</strong> if you cancel or can't make it, you'll be refunded $40 (everything except the $25 booking fee).</p>
+    <p><strong>Paid the $25 deposit:</strong> the deposit is non-refundable. The remaining $40 is due at your session.</p>
   </div>
 </main>
 
@@ -141,7 +151,7 @@
     box.classList.add('show');
     if(loaded[opt]) return;
     loaded[opt] = true;
-    if(!o.link){ box.innerHTML='<div class="soon">✨ Online card payment opens very soon — or choose “Pay at Session” to book now! ✨</div>'; return; }
+    if(!o.link){ box.innerHTML='<div class="soon">✨ Booking opens very soon! ✨</div>'; return; }
     Cal("init", opt, {origin:"https://cal.com"});
     Cal.ns[opt]("inline", { elementOrSelector:"#"+o.el, calLink:o.link, config:{ layout:"month_view", date:"2026-12-06" } });
     Cal.ns[opt]("ui", { theme:"light", styles:{ branding:{ brandColor:"#8e1b1b" } }, layout:"month_view" });
